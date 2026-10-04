@@ -1,0 +1,2080 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NightTrace — Case File 2026-10-04</title>
+<meta name="description" content="Field archive of an autonomous brainstorm that turned a paranormal &amp; cryptid hunting app into NightTrace.">
+<style>
+/* ============================================================
+   NIGHTTRACE — field archive stylesheet
+   dark: instrument panel at 3am / light: paper case file
+   ============================================================ */
+
+:root{
+  --bg:#06080b;
+  --bg-2:#0a0e13;
+  --panel:#0e1319;
+  --panel-2:#131a23;
+  --panel-3:#182130;
+  --line:#1f2a35;
+  --line-2:#2b3846;
+  --ink:#dce7f0;
+  --ink-dim:#a2b3c3;
+  --ink-faint:#7f92a4;
+  --ph:#5cf0c0;
+  --ph-rgb:92,240,192;
+  --am:#ffb454;
+  --am-rgb:255,180,84;
+  --rd:#ff6f61;
+  --rd-rgb:255,111,97;
+  --vi:#ab8dff;
+  --vi-rgb:171,141,255;
+  --shadow:0 1px 0 rgba(255,255,255,.03), 0 18px 48px -24px rgba(0,0,0,.9);
+  --grid:rgba(92,240,192,.05);
+  --glow:0 0 24px rgba(92,240,192,.18);
+  --noise-op:.05;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --rail-h:42px;
+}
+
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#efe9dd;
+    --bg-2:#e8e1d2;
+    --panel:#f8f4eb;
+    --panel-2:#fffdf7;
+    --panel-3:#f1ebdc;
+    --line:#d2c9b6;
+    --line-2:#bcb199;
+    --ink:#181c21;
+    --ink-dim:#454f5c;
+    --ink-faint:#6c7684;
+    --ph:#0a7359;
+    --ph-rgb:10,115,89;
+    --am:#9d5600;
+    --am-rgb:157,86,0;
+    --rd:#ad2b1e;
+    --rd-rgb:173,43,30;
+    --vi:#553bc4;
+    --vi-rgb:85,59,196;
+    --shadow:0 1px 0 rgba(255,255,255,.7), 0 14px 34px -22px rgba(60,45,20,.55);
+    --grid:rgba(20,60,50,.06);
+    --glow:0 0 22px rgba(10,115,89,.14);
+    --noise-op:.025;
+  }
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(120% 70% at 50% -10%, rgba(var(--ph-rgb),.07), transparent 62%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 40%);
+  background-attachment:fixed;
+}
+
+/* faint ruled field-grid behind everything */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background-image:
+    repeating-linear-gradient(0deg, var(--grid) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 34px);
+  mask-image:radial-gradient(120% 90% at 50% 0%, #000 20%, transparent 78%);
+  -webkit-mask-image:radial-gradient(120% 90% at 50% 0%, #000 20%, transparent 78%);
+}
+
+/* CRT scanlines — decorative, above canvas but below content interaction */
+.scanlines{
+  position:fixed;
+  inset:0;
+  z-index:9;
+  pointer-events:none;
+  opacity:.55;
+  background-image:repeating-linear-gradient(
+    180deg,
+    rgba(0,0,0,0) 0 2px,
+    rgba(0,0,0,.22) 2px 3px
+  );
+  mix-blend-mode:multiply;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]) .scanlines{ opacity:.3; mix-blend-mode:multiply; }
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .scanlines{ animation:scrolllines 12s linear infinite; }
+}
+@keyframes scrolllines{ from{ background-position-y:0; } to{ background-position-y:120px; } }
+
+::selection{ background:rgba(var(--am-rgb),.35); color:var(--ink); }
+
+a{ color:inherit; }
+
+.wrap{
+  position:relative;
+  z-index:1;
+  width:100%;
+  max-width:1120px;
+  margin:0 auto;
+  padding:0 16px;
+}
+
+/* ============================ top rail ============================ */
+
+.rail{
+  position:sticky;
+  top:0;
+  z-index:40;
+  height:var(--rail-h);
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border-bottom:1px solid var(--line);
+  background:var(--bg);
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.rail-in{
+  width:100%;
+  max-width:1120px;
+  margin:0 auto;
+  padding:0 16px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.led{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--ph);
+  box-shadow:0 0 0 3px rgba(var(--ph-rgb),.14), 0 0 12px rgba(var(--ph-rgb),.8);
+  flex:none;
+}
+@media (prefers-reduced-motion: no-preference){
+  .led{ animation:blip 4.2s ease-in-out infinite; }
+}
+@keyframes blip{ 0%,88%,100%{opacity:1} 92%{opacity:.25} 95%{opacity:1} 97%{opacity:.4} }
+
+.rail-id{ color:var(--ink-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.rail-id .id-long{ display:none; }
+@media (min-width:560px){
+  .rail-id .id-long{ display:inline; }
+}
+.rail-id b{ color:var(--ink); font-weight:600; }
+.rail-spacer{ flex:1 1 auto; }
+
+.btn{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ph);
+  background:transparent;
+  border:1px solid rgba(var(--ph-rgb),.4);
+  border-radius:3px;
+  padding:6px 10px;
+  cursor:pointer;
+  white-space:nowrap;
+  flex:none;
+  transition:background .18s ease, border-color .18s ease, color .18s ease;
+}
+.btn:hover,.btn:focus-visible{ background:rgba(var(--ph-rgb),.12); border-color:var(--ph); }
+.btn:focus-visible{ outline:2px solid var(--am); outline-offset:2px; }
+.btn[aria-pressed="true"]{
+  background:rgba(var(--am-rgb),.16);
+  border-color:rgba(var(--am-rgb),.6);
+  color:var(--am);
+}
+
+/* ============================ masthead ============================ */
+
+.masthead{
+  padding:56px 0 8px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,300px);
+  gap:36px;
+  align-items:center;
+}
+@media (max-width:820px){
+  .masthead{ grid-template-columns:minmax(0,1fr); gap:28px; padding-top:40px; }
+  .radar-wrap{ max-width:260px; }
+}
+
+.kicker{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  color:var(--am);
+  margin:0 0 18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.kicker::after{
+  content:"";
+  flex:1 1 60px;
+  height:1px;
+  background:linear-gradient(90deg, rgba(var(--am-rgb),.55), transparent);
+}
+
+.wordmark{
+  margin:0;
+  font-family:var(--mono);
+  font-weight:700;
+  font-size:clamp(1.9rem, 7.6vw, 3.7rem);
+  line-height:1.02;
+  letter-spacing:-.02em;
+  color:var(--ink);
+  white-space:nowrap;
+  text-shadow:0 0 40px rgba(var(--ph-rgb),.22);
+}
+.wordmark .trace-dot{ color:var(--ph); }
+
+.deck{
+  font-family:var(--mono);
+  font-size:clamp(.78rem, 2.6vw, .95rem);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ph);
+  margin:14px 0 0;
+}
+.deck span{ color:var(--ink-faint); }
+
+.lede{
+  margin:22px 0 0;
+  max-width:56ch;
+  font-size:1.03rem;
+  color:var(--ink-dim);
+}
+.lede strong{ color:var(--ink); font-weight:600; }
+
+.lede em{ font-style:normal; color:var(--am); }
+
+/* meta strip */
+.meta{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(104px, 1fr));
+  gap:0;
+  margin:30px 0 0;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:linear-gradient(180deg, var(--panel-2), var(--panel));
+  overflow:hidden;
+  font-family:var(--mono);
+}
+.meta div{
+  padding:12px 14px;
+  border-right:1px solid var(--line);
+  border-top:1px solid var(--line);
+  min-width:0;
+}
+.meta div:first-child{ border-top:0; }
+.meta dt{
+  font-size:9.5px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  margin:0 0 4px;
+}
+.meta dd{
+  margin:0;
+  font-size:1.35rem;
+  font-weight:700;
+  color:var(--ph);
+  font-variant-numeric:tabular-nums;
+  line-height:1.1;
+}
+.meta dd small{ display:block; font-size:9.5px; letter-spacing:.12em; color:var(--ink-faint); font-weight:400; margin-top:3px; }
+
+/* ============================ radar ============================ */
+
+.radar-wrap{
+  width:100%;
+  max-width:300px;
+  margin:0 auto;
+}
+.radar{
+  position:relative;
+  aspect-ratio:1;
+  width:100%;
+  border-radius:50%;
+  border:1px solid var(--line-2);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(var(--ph-rgb),.07), transparent 62%),
+    var(--panel);
+  box-shadow:var(--shadow), inset 0 0 60px rgba(var(--ph-rgb),.06);
+  overflow:hidden;
+  isolation:isolate;
+}
+.radar-svg{ position:absolute; inset:0; width:100%; height:100%; }
+.rr{ fill:none; stroke:var(--line-2); stroke-width:.6; }
+.rr.hot{ stroke:rgba(var(--ph-rgb),.28); }
+.rx{ stroke:var(--line); stroke-width:.5; stroke-dasharray:2 4; }
+.blip{ fill:var(--ph); }
+@media (prefers-reduced-motion: no-preference){
+  .blip{ animation:blipfade 7s ease-out infinite; }
+  .b2{ animation-delay:2.3s; }
+  .b3{ animation-delay:4.6s; }
+}
+@keyframes blipfade{ 0%,100%{opacity:.18} 6%{opacity:1} 14%{opacity:.65} 30%{opacity:.12} }
+.radar-sweep{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:conic-gradient(
+    from 0deg,
+    rgba(var(--ph-rgb),0) 0deg,
+    rgba(var(--ph-rgb),0) 292deg,
+    rgba(var(--ph-rgb),.05) 330deg,
+    rgba(var(--ph-rgb),.34) 357deg,
+    rgba(var(--ph-rgb),.7) 360deg
+  );
+}
+@media (prefers-reduced-motion: no-preference){
+  .radar-sweep{ animation:sweep 7s linear infinite; }
+}
+@keyframes sweep{ to{ transform:rotate(360deg); } }
+.radar-hub{
+  position:absolute;
+  left:50%; top:50%;
+  width:6px;height:6px;
+  margin:-3px 0 0 -3px;
+  border-radius:50%;
+  background:var(--ph);
+  box-shadow:0 0 12px rgba(var(--ph-rgb),.9);
+}
+.radar-cap{
+  display:block;
+  margin-top:12px;
+  text-align:center;
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.radar-cap b{
+  display:block;
+  margin-top:5px;
+  font-weight:400;
+  font-size:9.5px;
+  letter-spacing:.2em;
+  color:var(--ph);
+  opacity:.75;
+}
+
+/* ============================ sections ============================ */
+
+section{ padding:64px 0 0; }
+@media (max-width:600px){ section{ padding-top:48px; } }
+
+.sec-head{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+  border-bottom:1px solid var(--line);
+  padding-bottom:12px;
+  margin-bottom:26px;
+  flex-wrap:wrap;
+}
+.sec-num{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.2em;
+  color:var(--am);
+  border:1px solid rgba(var(--am-rgb),.4);
+  border-radius:2px;
+  padding:3px 7px;
+  flex:none;
+}
+h2{
+  font-family:var(--mono);
+  font-size:clamp(1.05rem, 4vw, 1.5rem);
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  font-weight:700;
+  margin:0;
+  flex:1 1 auto;
+  min-width:0;
+}
+.sec-note{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  flex:0 1 auto;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+@media (max-width:600px){
+  .sec-head .sec-note{ flex:1 1 100%; }
+}
+
+/* ============================ the law ============================ */
+
+.law{
+  border:1px solid rgba(var(--rd-rgb),.34);
+  border-left:3px solid var(--rd);
+  border-radius:4px;
+  background:linear-gradient(135deg, rgba(var(--rd-rgb),.08), transparent 55%), var(--panel);
+  padding:26px 24px 34px;
+  box-shadow:var(--shadow);
+}
+.law h3{
+  font-family:var(--mono);
+  text-transform:uppercase;
+  letter-spacing:.16em;
+  font-size:.82rem;
+  color:var(--rd);
+  margin:0 0 10px;
+}
+.law p{
+  margin:0;
+  font-size:clamp(1.15rem, 4.4vw, 1.7rem);
+  line-height:1.35;
+  font-weight:600;
+  max-width:34ch;
+  letter-spacing:-.01em;
+}
+.law p b{ color:var(--rd); }
+.law .sub{
+  margin-top:14px;
+  font-size:.95rem;
+  font-weight:400;
+  color:var(--ink-dim);
+  max-width:62ch;
+  line-height:1.6;
+}
+
+.instruments{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+  gap:14px;
+  margin-top:18px;
+}
+.inst{
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:var(--panel);
+  padding:14px;
+  min-width:0;
+}
+.inst h4{
+  font-family:var(--mono);
+  font-size:9.5px;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  margin:0 0 8px;
+  font-weight:500;
+}
+.gauge{ width:100%; height:auto; display:block; }
+.gauge-arc{ fill:none; stroke:var(--line-2); stroke-width:1.4; }
+.tick{ stroke:var(--line-2); stroke-width:1; }
+.tick.major{ stroke:rgba(var(--am-rgb),.7); stroke-width:1.4; }
+.needle-line{
+  stroke:var(--am);
+  stroke-width:1.8;
+  stroke-linecap:round;
+  transform-box:view-box;
+  transform-origin:70px 76px;
+  transform:rotate(-58deg);
+  filter:drop-shadow(0 0 5px rgba(var(--am-rgb),.65));
+}
+.pivot{ fill:var(--am); }
+.trace{ width:100%; height:44px; display:block; }
+.trace-base{ fill:none; stroke:var(--line-2); stroke-width:1; }
+.trace-live{
+  fill:none;
+  stroke:var(--ph);
+  stroke-width:1.6;
+  stroke-dasharray:26 420;
+  filter:drop-shadow(0 0 5px rgba(var(--ph-rgb),.7));
+}
+@media (prefers-reduced-motion: no-preference){
+  .trace-live{ animation:travel 6.5s linear infinite; }
+}
+@keyframes travel{ from{stroke-dashoffset:446} to{stroke-dashoffset:0} }
+.readout{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  margin-top:6px;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+}
+.readout b{ color:var(--ph); font-weight:600; }
+
+/* ============================ stamps ============================ */
+
+.stamps{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(170px,1fr));
+  gap:14px;
+  margin-top:22px;
+}
+.stampcard{
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:16px 14px;
+  background:var(--panel);
+  min-width:0;
+}
+.stampcard p{
+  margin:12px 0 0;
+  font-size:.84rem;
+  color:var(--ink-dim);
+  line-height:1.5;
+}
+.stamp{
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  padding:5px 10px;
+  border:2px solid currentColor;
+  border-radius:2px;
+  transform:rotate(-2.2deg);
+  opacity:.92;
+}
+.stamp-u{ color:var(--rd); background:rgba(var(--rd-rgb),.08); }
+.stamp-i{ color:var(--am); background:rgba(var(--am-rgb),.08); transform:rotate(1.4deg); }
+.stamp-e{ color:var(--ph); background:rgba(var(--ph-rgb),.08); transform:rotate(-1deg); }
+
+.struck{
+  font-family:var(--mono);
+  font-size:.78rem;
+  color:var(--ink-faint);
+  text-decoration:line-through;
+  text-decoration-color:var(--rd);
+  text-decoration-thickness:2px;
+}
+
+/* ============================ technique rail ============================ */
+
+.techs{ position:relative; margin-top:4px; }
+.tech{
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr) auto;
+  gap:16px;
+  align-items:start;
+  padding:16px 4px;
+  border-bottom:1px dashed var(--line);
+  position:relative;
+}
+.tech:last-of-type{ border-bottom:0; }
+.tech-idx{
+  font-family:var(--mono);
+  font-size:20px;
+  font-weight:700;
+  color:var(--ink-faint);
+  line-height:1;
+  padding-top:2px;
+  font-variant-numeric:tabular-nums;
+}
+.tech-body{ min-width:0; }
+.tech-body h3{
+  font-family:var(--mono);
+  font-size:.95rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin:0 0 4px;
+  font-weight:700;
+}
+.tech-body p{
+  margin:0;
+  font-size:.9rem;
+  color:var(--ink-dim);
+  line-height:1.5;
+}
+.tech-body .quote{
+  display:block;
+  margin-top:8px;
+  font-family:var(--mono);
+  font-size:.78rem;
+  color:var(--ink-faint);
+  border-left:2px solid var(--line-2);
+  padding-left:10px;
+}
+.tech-count{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ph);
+  border:1px solid rgba(var(--ph-rgb),.34);
+  border-radius:2px;
+  padding:4px 7px;
+  white-space:nowrap;
+  flex:none;
+  margin-top:2px;
+}
+.tech-count.is-insight{ color:var(--vi); border-color:rgba(var(--vi-rgb),.34); }
+.tech:hover .tech-idx{ color:var(--ph); }
+@media (max-width:600px){
+  .tech{ grid-template-columns:34px minmax(0,1fr); gap:12px; }
+  .tech-count{ grid-column:2; justify-self:start; margin-top:2px; }
+  .tech-idx{ font-size:16px; }
+}
+
+/* ============================ archetypes ============================ */
+
+.arch{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(238px,1fr));
+  gap:16px;
+}
+.archcard{
+  position:relative;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:
+    linear-gradient(180deg, var(--panel-2), var(--panel));
+  padding:20px 18px 18px;
+  min-width:0;
+  overflow:hidden;
+  transition:border-color .2s ease, transform .2s ease;
+}
+.archcard::before{
+  content:"";
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width:3px;
+  background:var(--ph);
+  opacity:.55;
+}
+.archcard.t2::before{ background:var(--am); }
+.archcard.t3::before{ background:var(--vi); }
+.archcard.t4::before{ background:var(--rd); }
+@media (prefers-reduced-motion: no-preference){
+  .archcard:hover{ transform:translateY(-2px); border-color:var(--line-2); }
+}
+.arch-tag{
+  font-family:var(--mono);
+  font-size:9.5px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  margin:0 0 10px;
+}
+.archcard h3{
+  font-family:var(--mono);
+  font-size:1.3rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin:0 0 6px;
+  font-weight:700;
+}
+.archcard .verb{
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:1.02rem;
+  color:var(--ph);
+  margin:0 0 14px;
+  line-height:1.4;
+}
+.archcard.t2 .verb{ color:var(--am); }
+.archcard.t3 .verb{ color:var(--vi); }
+.archcard.t4 .verb{ color:var(--rd); }
+.spec{
+  margin:0;
+  font-size:.84rem;
+  border-top:1px solid var(--line);
+}
+.spec div{
+  display:grid;
+  grid-template-columns:66px minmax(0,1fr);
+  gap:10px;
+  padding:7px 0;
+  border-bottom:1px solid var(--line);
+}
+.spec div:last-child{ border-bottom:0; }
+.spec dt{
+  font-family:var(--mono);
+  font-size:9.5px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+  padding-top:3px;
+}
+.spec dd{ margin:0; color:var(--ink-dim); line-height:1.45; }
+.spec dd b{ color:var(--ink); font-weight:600; }
+
+/* ============================ theme folders ============================ */
+
+.folders{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(288px,1fr));
+  gap:16px;
+}
+.folder{
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:var(--panel);
+  min-width:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+@media (prefers-reduced-motion: no-preference){
+  .folder{ transition:border-color .2s ease; }
+  .folder:hover{ border-color:var(--line-2); }
+}
+.folder-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:13px 16px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, var(--panel-2), transparent);
+}
+.folder-code{
+  font-family:var(--mono);
+  font-size:9.5px;
+  letter-spacing:.14em;
+  color:var(--bg);
+  background:var(--ph);
+  border-radius:2px;
+  padding:3px 6px;
+  flex:none;
+  font-weight:700;
+}
+.folder-head h3{
+  font-family:var(--mono);
+  font-size:.8rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  margin:0;
+  font-weight:700;
+  min-width:0;
+  flex:1 1 auto;
+}
+.folder-head .n{
+  font-family:var(--mono);
+  font-size:9.5px;
+  color:var(--ink-faint);
+  flex:none;
+}
+.folder ul{
+  margin:0;
+  padding:10px 16px 16px;
+  list-style:none;
+  flex:1 1 auto;
+}
+.folder li{
+  position:relative;
+  padding:7px 0 7px 18px;
+  font-size:.87rem;
+  line-height:1.5;
+  color:var(--ink-dim);
+  border-bottom:1px solid rgba(128,128,128,.1);
+}
+.folder li:last-child{ border-bottom:0; }
+.folder li::before{
+  content:"";
+  position:absolute;
+  left:2px; top:15px;
+  width:6px; height:6px;
+  border:1px solid rgba(var(--ph-rgb),.62);
+  transform:rotate(45deg);
+}
+.folder li b{ color:var(--ink); font-weight:600; }
+.folder li em{ font-style:normal; color:var(--am); }
+
+/* ============================ redaction ============================ */
+
+.redact{
+  position:relative;
+  display:inline-block;
+  cursor:help;
+  padding:0 1px;
+  outline-offset:3px;
+}
+.redact-bar{
+  position:absolute;
+  inset:-1px -2px;
+  background:var(--ink-dim);
+  border-radius:1px;
+  opacity:1;
+  transition:opacity .32s ease;
+  pointer-events:none;
+}
+.redact:hover .redact-bar,
+.redact:focus-visible .redact-bar,
+html.declassified .redact-bar{ opacity:0; }
+.redact::after{
+  content:"";
+  position:absolute;
+  right:-1px; top:50%;
+  width:3px; height:3px;
+  margin-top:-1.5px;
+  background:var(--bg);
+  border-radius:50%;
+  opacity:0;
+}
+.hint{
+  font-family:var(--mono);
+  font-size:9.5px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--am);
+  margin:14px 0 0;
+}
+
+/* ============================ signal threads ============================ */
+
+.threads{ display:flex; flex-direction:column; gap:14px; margin-top:4px; }
+.thread{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 62px minmax(0,1.08fr);
+  align-items:center;
+  gap:0;
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:var(--panel);
+  padding:14px 16px;
+  min-width:0;
+}
+.thread-inputs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  min-width:0;
+}
+.chip{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.06em;
+  color:var(--ink-dim);
+  border:1px solid var(--line-2);
+  border-radius:2px;
+  padding:4px 7px;
+  background:var(--panel-2);
+  line-height:1.35;
+}
+.thread-link{
+  position:relative;
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(var(--ph-rgb),.6), var(--ph));
+  margin:0 8px;
+}
+.thread-link::after{
+  content:"";
+  position:absolute;
+  right:-1px; top:-3.5px;
+  border:4px solid transparent;
+  border-left-color:var(--ph);
+}
+.thread-out{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  min-width:0;
+}
+.thread-out p{
+  margin:0;
+  font-size:.92rem;
+  color:var(--ink);
+  line-height:1.5;
+}
+.thread-out p b{ color:var(--ph); }
+.thread-badge{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.16em;
+  color:var(--vi);
+  border:1px solid rgba(var(--vi-rgb),.4);
+  border-radius:2px;
+  padding:3px 6px;
+  flex:none;
+  align-self:flex-start;
+}
+@media (max-width:720px){
+  .thread{ grid-template-columns:minmax(0,1fr); gap:12px; }
+  .thread-link{
+    height:26px;
+    width:1px;
+    margin:0 0 0 14px;
+    background:linear-gradient(180deg, transparent, rgba(var(--ph-rgb),.6), var(--ph));
+  }
+  .thread-link::after{
+    right:auto;
+    left:-3.5px; top:auto; bottom:-1px;
+    border-left-color:transparent;
+    border-top-color:var(--ph);
+  }
+}
+
+/* ============================ engines ============================ */
+
+.engines{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(256px,1fr));
+  gap:16px;
+}
+.engine{
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:linear-gradient(180deg, var(--panel-2), var(--panel));
+  padding:20px 18px;
+  min-width:0;
+  position:relative;
+}
+.engine-n{
+  font-family:var(--mono);
+  font-size:38px;
+  font-weight:700;
+  line-height:1;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(var(--ph-rgb),.42);
+  margin:0 0 10px;
+  letter-spacing:-.03em;
+}
+.engine h3{
+  font-family:var(--mono);
+  font-size:.95rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin:0 0 10px;
+  font-weight:700;
+}
+.engine p{ margin:0 0 12px; font-size:.87rem; color:var(--ink-dim); }
+.engine ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  border-top:1px solid var(--line);
+}
+.engine li{
+  font-size:.82rem;
+  color:var(--ink-dim);
+  padding:7px 0 7px 14px;
+  border-bottom:1px solid var(--line);
+  position:relative;
+  line-height:1.45;
+}
+.engine li:last-child{ border-bottom:0; }
+.engine li::before{
+  content:"›";
+  position:absolute;
+  left:0;
+  color:var(--ph);
+  font-family:var(--mono);
+}
+
+/* ============================ verdict panel ============================ */
+
+.verdict{
+  position:relative;
+  border:1px solid rgba(var(--am-rgb),.36);
+  border-radius:5px;
+  background:
+    repeating-linear-gradient(135deg, rgba(var(--am-rgb),.028) 0 12px, transparent 12px 24px),
+    linear-gradient(180deg, var(--panel-3), var(--panel));
+  box-shadow:var(--shadow);
+  padding:28px 22px 88px;
+  overflow:hidden;
+}
+.verdict::before{
+  content:"SEALED";
+  position:absolute;
+  bottom:22px; right:-46px;
+  transform:rotate(38deg);
+  font-family:var(--mono);
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.42em;
+  color:rgba(var(--am-rgb),.5);
+  border-top:2px solid rgba(var(--am-rgb),.36);
+  border-bottom:2px solid rgba(var(--am-rgb),.36);
+  padding:4px 52px;
+  pointer-events:none;
+}
+.verdict-head{
+  display:flex;
+  align-items:baseline;
+  gap:12px;
+  flex-wrap:nowrap;
+  border-bottom:1px solid var(--line);
+  padding-bottom:14px;
+  margin-bottom:6px;
+}
+.verdict-head h3{
+  flex:1 1 auto;
+  margin:0;
+  font-family:var(--mono);
+  font-size:1rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  font-weight:700;
+  color:var(--am);
+}
+.docket{
+  counter-reset:d;
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.docket li{
+  counter-increment:d;
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr);
+  gap:16px;
+  padding:16px 0;
+  border-bottom:1px dashed var(--line);
+  align-items:start;
+}
+.docket li:last-child{ border-bottom:0; }
+.docket li::before{
+  content:"D-" counter(d,decimal-leading-zero);
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.12em;
+  color:var(--am);
+  padding-top:4px;
+}
+.docket p{
+  margin:0;
+  font-size:1rem;
+  line-height:1.5;
+  color:var(--ink);
+  min-width:0;
+}
+.docket p span{
+  display:block;
+  margin-top:5px;
+  font-size:.83rem;
+  color:var(--ink-faint);
+  font-family:var(--mono);
+  letter-spacing:.02em;
+}
+@media (max-width:600px){
+  .docket li{ grid-template-columns:minmax(0,1fr); gap:6px; }
+  .verdict::before{ top:14px; right:-58px; font-size:10px; }
+}
+
+/* ============================ flywheel ============================ */
+
+.split{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(292px,1fr));
+  gap:16px;
+  align-items:stretch;
+}
+.panelbox{
+  border:1px solid var(--line);
+  border-radius:4px;
+  background:var(--panel);
+  padding:20px 18px;
+  min-width:0;
+}
+.panelbox h3{
+  font-family:var(--mono);
+  font-size:.82rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  margin:0 0 14px;
+  font-weight:700;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.panelbox h3::before{
+  content:"";
+  width:7px;height:7px;
+  background:var(--am);
+  transform:rotate(45deg);
+  flex:none;
+}
+.panelbox.risk h3::before{ background:var(--rd); }
+.flywheel{ width:100%; height:auto; display:block; }
+.fw-node{ fill:var(--panel-2); stroke:var(--ph); stroke-width:1.3; }
+.fw-step{ fill:none; stroke:rgba(var(--ph-rgb),.32); stroke-width:1.2; }
+.fw-arrow{ fill:rgba(var(--ph-rgb),.55); }
+.fw-label{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  fill:var(--ink-dim);
+}
+.fw-core{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.16em;
+  fill:var(--ph);
+  text-anchor:middle;
+}
+.risklist{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.risklist li{
+  display:grid;
+  grid-template-columns:28px minmax(0,1fr);
+  gap:12px;
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+  font-size:.87rem;
+  color:var(--ink-dim);
+  line-height:1.5;
+}
+.risklist li:last-child{ border-bottom:0; }
+.risklist .sev{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:.08em;
+  color:var(--rd);
+  border:1px solid rgba(var(--rd-rgb),.4);
+  border-radius:2px;
+  text-align:center;
+  padding:3px 0;
+  height:fit-content;
+}
+.risklist .sev.mid{ color:var(--am); border-color:rgba(var(--am-rgb),.4); }
+.risklist li b{ color:var(--ink); font-weight:600; }
+
+/* ============================ closing ============================ */
+
+.closing{
+  margin-top:64px;
+  border-top:1px solid var(--line);
+  padding:34px 0 64px;
+}
+.closing blockquote{
+  margin:0 0 22px;
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:clamp(1.1rem, 4vw, 1.5rem);
+  line-height:1.45;
+  color:var(--ink);
+  max-width:44ch;
+}
+.closing blockquote::before{ content:"“"; color:var(--am); }
+.closing blockquote::after{ content:"”"; color:var(--am); }
+.foot{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 22px;
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.foot b{ color:var(--ink-dim); font-weight:500; }
+
+.skip{
+  position:absolute;
+  left:-9999px;
+}
+.skip:focus{
+  left:16px; top:6px;
+  z-index:60;
+  background:var(--panel-2);
+  color:var(--ph);
+  padding:8px 12px;
+  border:1px solid var(--ph);
+  border-radius:3px;
+  font-family:var(--mono);
+  font-size:11px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *,*::before,*::after{ animation:none !important; transition:none !important; }
+  .radar-sweep{
+    background:conic-gradient(from 0deg, rgba(var(--ph-rgb),0) 0deg, rgba(var(--ph-rgb),.2) 330deg, rgba(var(--ph-rgb),.55) 360deg);
+  }
+  .needle-line{ transform:rotate(-58deg); }
+}
+
+@media print{
+  .scanlines,.rail{ display:none; }
+  body{ background:#fff; color:#000; }
+}
+</style>
+</head>
+<body>
+<div class="scanlines" aria-hidden="true"></div>
+
+<a class="skip" href="#main">Skip to case file</a>
+
+<div class="rail">
+  <div class="rail-in">
+    <span class="led" aria-hidden="true"></span>
+    <span class="rail-id"><b>NIGHTTRACE</b><span class="id-long"> &nbsp;·&nbsp; CASE 2026-10-04 &nbsp;·&nbsp; AUTONOMOUS IDEATION</span></span>
+    <span class="rail-spacer"></span>
+    <button class="btn" id="declass" type="button" aria-pressed="false" hidden>Declassify redactions</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="masthead">
+    <div>
+      <p class="kicker">Field Archive · Divergent Session Closed</p>
+      <h1 class="wordmark">Night<span class="trace-dot">Trace</span></h1>
+      <p class="deck">A paranormal field journal <span>·</span> for phones <span>·</span> not a detector</p>
+
+      <p class="lede">
+        One concept entered: <strong>“Paranormal &amp; Cryptid Hunting App.”</strong>
+        What left was a field journal whose case file writes itself — where the sensors are
+        <em>flavor, never proof</em>, and the deliverable is a story the user believes they took part in.
+      </p>
+
+      <dl class="meta">
+        <div><dt>Log entries</dt><dd>139</dd></div>
+        <div><dt>Ideas</dt><dd>108</dd></div>
+        <div><dt>Techniques</dt><dd>9</dd></div>
+        <div><dt>Insights</dt><dd>16</dd></div>
+        <div><dt>Decisions</dt><dd>6</dd></div>
+      </dl>
+    </div>
+
+    <div class="radar-wrap">
+      <div class="radar" role="img" aria-label="Decorative radar sweep with intermittent signal blips.">
+        <svg class="radar-svg" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="rr" cx="100" cy="100" r="96"></circle>
+          <circle class="rr hot" cx="100" cy="100" r="74"></circle>
+          <circle class="rr" cx="100" cy="100" r="52"></circle>
+          <circle class="rr" cx="100" cy="100" r="28"></circle>
+          <line class="rx" x1="4" y1="100" x2="196" y2="100"></line>
+          <line class="rx" x1="100" y1="4" x2="100" y2="196"></line>
+          <line class="rx" x1="28" y1="28" x2="172" y2="172"></line>
+          <line class="rx" x1="172" y1="28" x2="28" y2="172"></line>
+          <circle class="blip b1" cx="140" cy="70" r="3"></circle>
+          <circle class="blip b2" cx="62" cy="132" r="2.5"></circle>
+          <circle class="blip b3" cx="122" cy="150" r="2"></circle>
+        </svg>
+        <div class="radar-sweep" aria-hidden="true"></div>
+        <div class="radar-hub" aria-hidden="true"></div>
+      </div>
+      <span class="radar-cap">Sweep 7s<b>no returns confirmed</b></span>
+    </div>
+  </header>
+
+  <main id="main">
+
+  <!-- ================= 01 THE LAW ================= -->
+  <section aria-labelledby="s1">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 id="s1">The law the whole build hangs on</h2>
+      <span class="sec-note">First principles · bedrock</span>
+    </div>
+
+    <div class="law">
+      <h3>Primary constraint</h3>
+      <p>Uncertainty is the product. <b>Predictability is the anti-metric.</b></p>
+      <p class="sub">
+        Every system is judged by one question: does it <b>protect</b> uncertainty or spend it?
+        If a user can predict when an event fires, the product is dead. This single law produced
+        the silence mandate, the no-encounter protection, and the ban on verifiable numbers —
+        they are all the same decision wearing different clothes.
+      </p>
+    </div>
+
+    <div class="instruments">
+      <div class="inst">
+        <h4>EMF needle · proximity proxy</h4>
+        <svg class="gauge" viewBox="0 0 140 84" role="img" aria-label="Decorative field needle drifting without settling.">
+          <path class="gauge-arc" d="M14 76 A56 56 0 0 1 126 76"></path>
+          <g id="ticks"></g>
+          <line class="needle-line" x1="70" y1="76" x2="70" y2="28"></line>
+          <circle class="pivot" cx="70" cy="76" r="4"></circle>
+        </svg>
+        <p class="readout"><span>Reading</span><b>UNSETTLED</b></p>
+      </div>
+
+      <div class="inst">
+        <h4>Field trace · ambient channel</h4>
+        <svg class="trace" viewBox="0 0 300 40" preserveAspectRatio="none" role="img" aria-label="Decorative ambient signal trace with sparse spikes.">
+          <path class="trace-base" d="M0 20 L18 20 L22 16 L26 24 L30 20 L52 20 L56 9 L60 31 L64 20 L92 20 L96 17 L100 23 L104 20 L136 20 L140 13 L144 27 L148 20 L176 20 L180 18 L184 22 L188 20 L214 20 L218 4 L222 36 L226 20 L258 20 L262 15 L266 25 L270 20 L300 20"></path>
+          <path class="trace-live" d="M0 20 L18 20 L22 16 L26 24 L30 20 L52 20 L56 9 L60 31 L64 20 L92 20 L96 17 L100 23 L104 20 L136 20 L140 13 L144 27 L148 20 L176 20 L180 18 L184 22 L188 20 L214 20 L218 4 L222 36 L226 20 L258 20 L262 15 L266 25 L270 20 L300 20"></path>
+        </svg>
+        <p class="readout"><span>Noise = content</span><b>NOT FILTERED</b></p>
+      </div>
+    </div>
+
+    <div class="stamps">
+      <div class="stampcard">
+        <span class="stamp stamp-u">Unexplained</span>
+        <p>Evidence points somewhere the app will not name. The strongest possible outcome — the case stays open on purpose.</p>
+      </div>
+      <div class="stampcard">
+        <span class="stamp stamp-i">Inconclusive</span>
+        <p>The default. Something registered, nothing resolved. This is what most nights should look like.</p>
+      </div>
+      <div class="stampcard">
+        <span class="stamp stamp-e">Explained</span>
+        <p>A mundane cause is offered. Failure dressed as closure — and it is a designed, reachable, honest ending.</p>
+      </div>
+      <div class="stampcard">
+        <p class="struck" style="margin:0 0 10px">Ghost Probability: 94.2%</p>
+        <p style="margin:0">The old readout. <span class="stamp stamp-u" style="font-size:9.5px;transform:rotate(-3deg)">Removed</span> No number a user could try to verify survives into the primary UI.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 02 TECHNIQUE SEQUENCE ================= -->
+  <section aria-labelledby="s2">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 id="s2">Technique sequence</h2>
+      <span class="sec-note">Nine passes · in order</span>
+    </div>
+
+    <div class="techs">
+      <article class="tech">
+        <div class="tech-idx">01</div>
+        <div class="tech-body">
+          <h3>First Principles Thinking</h3>
+          <p>Stripped the product to bedrock and found the floor was made of stories, not sensors.</p>
+          <span class="quote">“The phone is not a detector; it is a case file that writes itself.”</span>
+        </div>
+        <span class="tech-count">19 ideas</span>
+      </article>
+
+      <article class="tech">
+        <div class="tech-idx">02</div>
+        <div class="tech-body">
+          <h3>Job to Be Done</h3>
+          <p>Found the real hire: not proof-of-ghost, but proof-of-experience — a receipt for a night out.</p>
+          <span class="quote">“The true competitors are boredom and the user's own skepticism.”</span>
+        </div>
+        <span class="tech-count">12 ideas</span>
+      </article>
+
+      <article class="tech">
+        <div class="tech-idx">03</div>
+        <div class="tech-body">
+          <h3>Reverse Brainstorming</h3>
+          <p>Wrote the failure manual first — then inverted all sixteen lines into requirements.</p>
+          <span class="quote">“How to fail: fire an event every 10 seconds → so mandate long silences between signals.”</span>
+        </div>
+        <span class="tech-count">16 ideas</span>
+      </article>
+
+      <article class="tech">
+        <div class="tech-idx">04</div>
+        <div class="tech-body">
+          <h3>SCAMPER</h3>
+          <p>Substituted scores for stamps, deleted the tool grid, and reversed who does the finding.</p>
+          <span class="quote">“Reverse: instead of the user finding the creature, the creature finds the user.”</span>
+        </div>
+        <span class="tech-count">14 ideas</span>
+      </article>
+
+      <article class="tech">
+        <div class="tech-idx">05</div>
+        <div class="tech-body">
+          <h3>Morphological Analysis</h3>
+          <p>Split a hunt into seven independent parameters, then recombined them into named modes.</p>
+          <span class="quote">Environment × tool set × pacing × archetype × sensory channel × completion × failure.</span>
+        </div>
+        <span class="tech-count">15 nodes</span>
+      </article>
+
+      <article class="tech">
+        <div class="tech-idx">06</div>
+        <div class="tech-body">
+          <h3>Worst Possible Idea</h3>
+          <p>Designed the worst detector app on purpose, then flipped every single line of it.</p>
+          <span class="quote">“Worst: ads between scans → zero mid-session ads; monetize only at case boundaries.”</span>
+        </div>
+        <span class="tech-count">9 ideas</span>
+      </article>
+
+      <article class="tech">
+        <div class="tech-idx">07</div>
+        <div class="tech-body">
+          <h3>Crank the Dial to 11</h3>
+          <p>Pushed silence, rarity, place and haptics past the point of comfort — and kept what survived.</p>
+          <span class="quote">“A dead-quiet hunt whose entire reward is one impossible sound after 15 minutes.”</span>
+        </div>
+        <span class="tech-count">8 ideas</span>
+      </article>
+
+      <article class="tech">
+        <div class="tech-idx">08</div>
+        <div class="tech-body">
+          <h3>Ritual Innovation</h3>
+          <p>Turned a session into a ceremony with a threshold, a question asked aloud, and a seal.</p>
+          <span class="quote">“Naming your investigation turns a session into a possession.”</span>
+        </div>
+        <span class="tech-count">8 ideas</span>
+      </article>
+
+      <article class="tech">
+        <div class="tech-idx">09</div>
+        <div class="tech-body">
+          <h3>Emerging Tech Collision</h3>
+          <p>Collided the phone with ambient audio ML, wearables, weather feeds and nearby co-op.</p>
+          <span class="quote">“The room becomes the script.”</span>
+        </div>
+        <span class="tech-count">8 ideas</span>
+      </article>
+
+      <article class="tech" style="border-top:1px dashed var(--line);">
+        <div class="tech-idx" style="color:var(--vi)">↳</div>
+        <div class="tech-body">
+          <h3 style="color:var(--vi)">Synthesis</h3>
+          <p>The 108 ideas were compressed into seven load-bearing insights — then the session closed divergent and produced eight more convergences on top.</p>
+        </div>
+        <span class="tech-count is-insight">16 insights</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= 03 ARCHETYPES ================= -->
+  <section aria-labelledby="s3">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2 id="s3">Four creatures, four archetypes</h2>
+      <span class="sec-note">Future creatures are parameter sets, not code</span>
+    </div>
+
+    <div class="arch">
+      <article class="archcard">
+        <p class="arch-tag">Archetype A · Visual-led</p>
+        <h3>Observer</h3>
+        <p class="verb">You must avoid being noticed. The mirror of hunting.</p>
+        <dl class="spec">
+          <div><dt>Verb</dt><dd>Hide. Hold still. Do not look directly.</dd></div>
+          <div><dt>Combo</dt><dd>Indoor + camera + slow + haptic-led</dd></div>
+          <div><dt>Signature</dt><dd>It is <b>already there</b>; the session measures your nerve.</dd></div>
+          <div><dt>Fail state</dt><dd>You were seen.</dd></div>
+          <div><dt>Example</dt><dd><span class="redact" tabindex="0">Shadow Person<span class="redact-bar" aria-hidden="true"></span></span></dd></div>
+        </dl>
+      </article>
+
+      <article class="archcard t2">
+        <p class="arch-tag">Archetype B · Haptic-led</p>
+        <h3>Stalker</h3>
+        <p class="verb">Proximity closes on its own. The creature finds you.</p>
+        <dl class="spec">
+          <div><dt>Verb</dt><dd>Move, and feel the phone quicken.</dd></div>
+          <div><dt>Instrument</dt><dd>Phone becomes a <b>Geiger heartbeat</b> that accelerates as it nears.</dd></div>
+          <div><dt>Signature</dt><dd>Distance is never displayed — only felt.</dd></div>
+          <div><dt>Fail state</dt><dd>It reached you before you reached the exit.</dd></div>
+        </dl>
+      </article>
+
+      <article class="archcard t3">
+        <p class="arch-tag">Archetype C · Audio-led</p>
+        <h3>Mimic</h3>
+        <p class="verb">It echoes your own recorded audio back, with a delay.</p>
+        <dl class="spec">
+          <div><dt>Verb</dt><dd>Speak first. Wait. Regret it.</dd></div>
+          <div><dt>Primitive</dt><dd>Audio in, entity out — one shared input bus, three outputs.</dd></div>
+          <div><dt>Inversion</dt><dd>The Spirit Box asks <b>you</b> questions before you ask it anything.</dd></div>
+          <div><dt>Fail state</dt><dd>It used your voice to answer you.</dd></div>
+        </dl>
+      </article>
+
+      <article class="archcard t4">
+        <p class="arch-tag">Archetype D · Glance-and-gone</p>
+        <h3>Ambusher</h3>
+        <p class="verb">One frame. Maybe. You will argue about it later.</p>
+        <dl class="spec">
+          <div><dt>Verb</dt><dd>Whip the torch around — too late.</dd></div>
+          <div><dt>Combo</dt><dd>Outdoor + tracker + ambusher + visual-led</dd></div>
+          <div><dt>Signature</dt><dd>Speed over certainty; the scare is <b>almost, peripheral, ambiguous</b>.</dd></div>
+          <div><dt>Fail state</dt><dd>False positive — you never got the second look.</dd></div>
+          <div><dt>Example</dt><dd><span class="redact" tabindex="0">Bigfoot<span class="redact-bar" aria-hidden="true"></span></span></dd></div>
+        </dl>
+      </article>
+    </div>
+
+    <p class="hint">▸ Grey blocks are redacted — hover, tab to, or use the button up top to declassify.</p>
+
+    <div class="instruments" style="margin-top:22px">
+      <div class="inst">
+        <h4>Combinatorial fallout · named modes</h4>
+        <p class="readout" style="display:block;line-height:1.9;color:var(--ink-dim);letter-spacing:0;text-transform:none;font-size:.85rem">
+          <b>Escort</b> — protect an object or NPC for N minutes.<br>
+          <b>Containment</b> — herd the entity toward a marked spot with sound and light.<br>
+          <b>Observer</b> — a whole mode where the goal is not being noticed.<br>
+          <b>Road-trip UFO chase</b> — vehicle + sky scanner + fast + audio-led.
+        </p>
+      </div>
+      <div class="inst">
+        <h4>Parked for later · archetypes not shipped in MVP</h4>
+        <p class="readout" style="display:block;line-height:1.9;color:var(--ink-dim);letter-spacing:0;text-transform:none;font-size:.85rem">
+          <b>Migrator</b> — genuinely traverses the map across a session.<br>
+          <b>Trickster</b> — plants false evidence you must later discredit.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 04 FIELD NOTES BY THEME ================= -->
+  <section aria-labelledby="s4">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2 id="s4">Field notes · curated by theme</h2>
+      <span class="sec-note">~60 kept of 108 · strongest only</span>
+    </div>
+
+    <div class="folders">
+
+      <article class="folder">
+        <div class="folder-head">
+          <span class="folder-code">A</span>
+          <h3>The reframe</h3>
+          <span class="n">First Principles</span>
+        </div>
+        <ul>
+          <li>The phone is a <b>case file that writes itself</b> — the device narrates, it does not measure.</li>
+          <li>Change the verb from <em>detect</em> to <em>investigate</em>. Detection implies proof; investigation implies process.</li>
+          <li>Users cannot verify any claim, so the only real deliverable is a story they believe they took part in.</li>
+          <li>Sensors are inherently noisy — treat the noise as <b>content</b>, not an obstacle to filter.</li>
+          <li>A session is a <b>field trip</b>, not a tool launch.</li>
+          <li>Evidence is not data — it is a <b>souvenir of a moment</b>.</li>
+          <li>Never show a number a user could try to verify.</li>
+        </ul>
+      </article>
+
+      <article class="folder">
+        <div class="folder-head">
+          <span class="folder-code">B</span>
+          <h3>The jobs</h3>
+          <span class="n">JTBD</span>
+        </div>
+        <ul>
+          <li>Give me a reason to feel something on a dull night walk — <b>an ambient companion</b>.</li>
+          <li>Hand me a story to tell my friends tomorrow.</li>
+          <li>Let me play pretend seriously for twenty minutes <em>without winking at me</em>.</li>
+          <li>Make my ordinary place feel mysterious.</li>
+          <li>Scare me safely, on my own terms.</li>
+          <li>Give me something to do with my kids or on a Friday date.</li>
+          <li>Biggest job: convert the mundane — commute, attic, backyard — into <b>the meaningful</b>.</li>
+          <li>Anti-jobs: they are <em>not</em> hiring it to learn science, to truly detect ghosts, or to be deceived.</li>
+        </ul>
+      </article>
+
+      <article class="folder">
+        <div class="folder-head">
+          <span class="folder-code">C</span>
+          <h3>Absence &amp; pacing</h3>
+          <span class="n">Reverse + Dial 11</span>
+        </div>
+        <ul>
+          <li><b>No-encounter sessions are valid</b> — even good. Protect them in the design.</li>
+          <li>Mandate long silences between signals; an event every 10 seconds is the failure mode.</li>
+          <li>The scare is <b>almost, peripheral, ambiguous</b>. The scare is a maybe.</li>
+          <li>A dead-quiet hunt whose entire reward is one impossible sound after 15 minutes.</li>
+          <li>Silence plus ambience — music only ever as an encounter sting.</li>
+          <li>Every target gets a birth, a velocity, an uncertainty, and a death. No forever-random dots.</li>
+          <li>Assign micro-jobs: ask a question, sweep a baseline, log a spot.</li>
+        </ul>
+      </article>
+
+      <article class="folder">
+        <div class="folder-head">
+          <span class="folder-code">D</span>
+          <h3>Evidence &amp; the receipt</h3>
+          <span class="n">Report-first</span>
+        </div>
+        <ul>
+          <li>Evidence compounds toward a creature <b>signature</b> — never feels random.</li>
+          <li>Triage + trickster false evidence + end-of-case rating = a <b>deduction mini-layer</b> that makes the report feel earned.</li>
+          <li>The report is the job's receipt: <em>proof-of-experience, not proof-of-ghost</em>.</li>
+          <li>Treat the report as the <b>hero screen</b>, not an afterthought — build it before the tools.</li>
+          <li>Auto-assemble the strongest evidence into an evidence-reel share video.</li>
+          <li>Native, watermark-free, beautiful share card. If a moment can't be screenshotted, it didn't happen.</li>
+        </ul>
+      </article>
+
+      <article class="folder">
+        <div class="folder-head">
+          <span class="folder-code">E</span>
+          <h3>Infinite variety</h3>
+          <span class="n">Seeding</span>
+        </div>
+        <ul>
+          <li>Seed from <b>place + hour + weather + sensor noise</b> = a one-time, unrepeatable fingerprint.</li>
+          <li>Daily briefing: <em>“the anomaly tonight is…”</em> — different every day.</li>
+          <li>Shared-seed nights: everyone worldwide hunts the same generated anomaly.</li>
+          <li>Personal → daily → global is <b>one idea at three altitudes</b>: a rotating world clock that manufactures variety for free.</li>
+          <li>Real weather API drives event tables — a thunderstorm unlocks a storm entity.</li>
+          <li>Legendary entity as a 0.5% event, stated plainly: no one in your area has seen it.</li>
+          <li>GPS + dusk + weather declare a real hot zone: <b>tonight, your area is active</b>.</li>
+        </ul>
+      </article>
+
+      <article class="folder">
+        <div class="folder-head">
+          <span class="folder-code">F</span>
+          <h3>Ritual &amp; anticipation</h3>
+          <span class="n">Ritual Innovation</span>
+        </div>
+        <ul>
+          <li>Short gear-up checklist every hunt: <b>calibrate, name the case, set intention</b>.</li>
+          <li>Ask the dark a question aloud — and the payoff may arrive minutes later.</li>
+          <li>Naming your investigation turns a session into a <b>possession</b>.</li>
+          <li>Design the threshold crossing: from <em>calibrated and ready</em> into the dark.</li>
+          <li>Debrief prompt — <em>what did you hear?</em> — inviting the user to write their own account.</li>
+          <li>Close the case with a stamped, ceremonially final report. A seal-the-evidence gesture locks the file.</li>
+          <li>Cold-start mode: no UI chrome at all. A dark screen and one button.</li>
+        </ul>
+      </article>
+
+      <article class="folder">
+        <div class="folder-head">
+          <span class="folder-code">G</span>
+          <h3>Money &amp; trust</h3>
+          <span class="n">Worst Idea, flipped</span>
+        </div>
+        <ul>
+          <li>Zero mid-session ads; monetize only at natural case boundaries.</li>
+          <li>Unlimited hunts — scarcity lives in <b>rare creatures</b>, not energy timers.</li>
+          <li>Fully deterministic unlocks with visible requirements. No loot boxes, ever.</li>
+          <li>Zero-login, offline-first; an account only to sync or restore.</li>
+          <li>Private journal by default; sharing is opt-in, per moment.</li>
+          <li>Earned dread with an explicit intensity slider.</li>
+          <li>Four deep creatures each with a unique verb and fail state — not forty reskins.</li>
+          <li><b>Never make a falsifiable claim, and never claim science.</b> Frame the simulation openly.</li>
+        </ul>
+      </article>
+
+      <article class="folder">
+        <div class="folder-head">
+          <span class="folder-code">H</span>
+          <h3>Tech collisions</h3>
+          <span class="n">Emerging Tech</span>
+        </div>
+        <ul>
+          <li>On-device audio classification maps <b>real ambient sound</b> — wind, a car — to in-game events. The room becomes the script.</li>
+          <li>Whisper into the mic; local keyword spotting makes the entity respond to what <em>you</em> said.</li>
+          <li>Director Mode async: a friend replays your case and injects events into your next session.</li>
+          <li>Wearable heart-rate as a tension dial — real fear makes the entity escalate.</li>
+          <li>Two phones synchronised into one shared case, in real time. Local co-op, no server.</li>
+          <li>Case trade: gift a rare evidence card or creature intro to a friend.</li>
+          <li>Later: ARKit or LiDAR anchors apparitions in real 3D space.</li>
+        </ul>
+      </article>
+
+      <article class="folder">
+        <div class="folder-head">
+          <span class="folder-code">I</span>
+          <h3>Trust boundaries</h3>
+          <span class="n">Permissions</span>
+        </div>
+        <ul>
+          <li>Ask for permissions <b>just in time</b> — never up front.</li>
+          <li>A ghost hunt must run on <b>mic only</b>; the torch, camera and location are opt-in layers.</li>
+          <li>Duty-cycle the sensors; offer a dimmed low-power mode so a long walk doesn't drain the phone.</li>
+          <li>No loading spinners — everything is local and instant.</li>
+          <li>The entity remembers you and references your last case across sessions.</li>
+          <li>If the user can decode the event engine, the magic dies — hold the mask.</li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= 05 SIGNAL THREADS ================= -->
+  <section aria-labelledby="s5">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2 id="s5">Signal threads</h2>
+      <span class="sec-note">Separate ideas resolving to one primitive</span>
+    </div>
+
+    <div class="threads">
+
+      <article class="thread">
+        <div class="thread-inputs">
+          <span class="chip">Place + time seed</span>
+          <span class="chip">Daily anomaly</span>
+          <span class="chip">Shared-seed night</span>
+        </div>
+        <div class="thread-link" aria-hidden="true"></div>
+        <div class="thread-out">
+          <span class="thread-badge">T-01</span>
+          <p>One idea at three altitudes — personal, daily, global. A <b>rotating world clock</b> that manufactures variety for free.</p>
+        </div>
+      </article>
+
+      <article class="thread">
+        <div class="thread-inputs">
+          <span class="chip">Mimic archetype</span>
+          <span class="chip">Whisper / keyword ritual</span>
+          <span class="chip">Director Mode</span>
+        </div>
+        <div class="thread-link" aria-hidden="true"></div>
+        <div class="thread-out">
+          <span class="thread-badge">T-02</span>
+          <p>The same primitive — <b>audio in, entity out</b>. Build one audio-input bus, ship three outputs.</p>
+        </div>
+      </article>
+
+      <article class="thread">
+        <div class="thread-inputs">
+          <span class="chip">Evidence → signature</span>
+          <span class="chip">Trickster false evidence</span>
+          <span class="chip">End-of-case triage</span>
+        </div>
+        <div class="thread-link" aria-hidden="true"></div>
+        <div class="thread-out">
+          <span class="thread-badge">T-03</span>
+          <p>Together they form a <b>deduction mini-layer</b> — the thing that makes the report feel earned rather than generated.</p>
+        </div>
+      </article>
+
+      <article class="thread">
+        <div class="thread-inputs">
+          <span class="chip">Crank silence</span>
+          <span class="chip">Protect no-encounter</span>
+          <span class="chip">Qualitative readouts</span>
+        </div>
+        <div class="thread-link" aria-hidden="true"></div>
+        <div class="thread-out">
+          <span class="thread-badge">T-04</span>
+          <p>One design law: the app's job is to make <b>absence meaningful</b>, not to deliver events.</p>
+        </div>
+      </article>
+
+      <article class="thread">
+        <div class="thread-inputs">
+          <span class="chip">Three-engine collapse</span>
+          <span class="chip">Archetype parameterisation</span>
+        </div>
+        <div class="thread-link" aria-hidden="true"></div>
+        <div class="thread-out">
+          <span class="thread-badge">T-05</span>
+          <p>The roadmap writes itself: <b>Engine → Report → Journal</b>. After that, creatures are content-only drops needing zero engine work.</p>
+        </div>
+      </article>
+
+      <article class="thread">
+        <div class="thread-inputs">
+          <span class="chip">Report before tools</span>
+          <span class="chip">Share card</span>
+          <span class="chip">JTBD receipt</span>
+        </div>
+        <div class="thread-link" aria-hidden="true"></div>
+        <div class="thread-out">
+          <span class="thread-badge">T-06</span>
+          <p>The growth flywheel: <b>tools generate → report packages → share recruits → new hunters generate more.</b></p>
+        </div>
+      </article>
+
+      <article class="thread">
+        <div class="thread-inputs">
+          <span class="chip">Place + time seeding</span>
+          <span class="chip">Shareability</span>
+        </div>
+        <div class="thread-link" aria-hidden="true"></div>
+        <div class="thread-out">
+          <span class="thread-badge">T-07</span>
+          <p>Two halves of one uncertainty engine — the <b>retention half</b> and the <b>virality half</b> of the same source of novelty.</p>
+        </div>
+      </article>
+
+      <article class="thread">
+        <div class="thread-inputs">
+          <span class="chip">Uncertainty is the product</span>
+          <span class="chip">No verifiable numbers</span>
+          <span class="chip">Frame the simulation openly</span>
+        </div>
+        <div class="thread-link" aria-hidden="true"></div>
+        <div class="thread-out">
+          <span class="thread-badge">T-08</span>
+          <p>Surviving <b>the skeptic's test</b> — the single highest-risk surface in the whole product.</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= 06 ENGINES ================= -->
+  <section aria-labelledby="s6">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <h2 id="s6">Three engines</h2>
+      <span class="sec-note">Everything else is data</span>
+    </div>
+
+    <div class="engines">
+      <article class="engine">
+        <p class="engine-n">01</p>
+        <h3>Investigation Engine</h3>
+        <p>Seeded session generation plus the uncertainty-protecting event director. It loads archetype behaviours and refuses to spend the one resource that matters.</p>
+        <ul>
+          <li>Place + time + weather + noise seed</li>
+          <li>Event director that protects uncertainty</li>
+          <li>Treats sensor noise as content</li>
+          <li>Archetype behaviour loader</li>
+        </ul>
+      </article>
+
+      <article class="engine">
+        <p class="engine-n">02</p>
+        <h3>Evidence / Case System</h3>
+        <p>Evidence compounds toward a creature signature. Triage and false-evidence handling turn a pile of moments into a deduction the user believes they made.</p>
+        <ul>
+          <li>Evidence → signature compounding</li>
+          <li>Triage + trickster false evidence</li>
+          <li>Case Report + share card</li>
+          <li>Auto-assembled evidence reel</li>
+        </ul>
+      </article>
+
+      <article class="engine">
+        <p class="engine-n">03</p>
+        <h3>Journal / Progression</h3>
+        <p>Private by default. Diegetic clearance replaces XP; rarity replaces timers; the daily anomaly replaces the notification.</p>
+        <ul>
+          <li>Investigator Clearance (replaces XP)</li>
+          <li>Rare evidence &amp; card collection</li>
+          <li>Daily anomaly briefing</li>
+          <li>Shared-seed nights</li>
+        </ul>
+      </article>
+    </div>
+
+    <p class="hint" style="color:var(--ink-faint)">▸ Build order: Engine → Report → Journal. Ship the report and share card <em>before</em> the tools.</p>
+  </section>
+
+  <!-- ================= 07 SEALED VERDICT ================= -->
+  <section aria-labelledby="s7">
+    <div class="sec-head">
+      <span class="sec-num">07</span>
+      <h2 id="s7">Sealed verdict</h2>
+      <span class="sec-note">Six decisions · closed 2026-10-04T11:12</span>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-head">
+        <h3>Decisions of record</h3>
+        <span class="sec-note">Do not reopen without new evidence</span>
+      </div>
+
+      <ol class="docket">
+        <li>
+          <p>Ship <b>four creatures deep, not many shallow</b> — each with a unique verb and a unique fail state.
+            <span>Scope frozen · future creatures parked as content drops</span>
+          </p>
+        </li>
+        <li>
+          <p>Build <b>the report and share card before the tools.</b>
+            <span>The hero screen is the growth engine; everything else feeds it</span>
+          </p>
+        </li>
+        <li>
+          <p>Use <b>qualitative readouts everywhere</b>; expose no verifiable numbers.
+            <span>Unexplained · Inconclusive · Explained replaces every score</span>
+          </p>
+        </li>
+        <li>
+          <p>The <b>free first hunt must include a real encounter</b>; place the paywall after the second case.
+            <span>No ads mid-session — monetize only at case boundaries</span>
+          </p>
+        </li>
+        <li>
+          <p><b>Data-driven creature definitions</b> with behaviour archetypes; the engine never hardcodes a creature.
+            <span>Future creatures ship with zero engine work</span>
+          </p>
+        </li>
+        <li>
+          <p><b>Four tabs only: Home · Investigate · Field Journal · Profile.</b>
+            <span>The Equipment tab is cut — tools live inside hunts</span>
+          </p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= 08 OPEN ANOMALIES ================= -->
+  <section aria-labelledby="s8">
+    <div class="sec-head">
+      <span class="sec-num">08</span>
+      <h2 id="s8">Open anomalies &amp; the loop forward</h2>
+      <span class="sec-note">Unresolved on purpose</span>
+    </div>
+
+    <div class="split">
+
+      <div class="panelbox">
+        <h3>The growth flywheel</h3>
+        <svg class="flywheel" viewBox="0 0 340 280" role="img" aria-label="Four-stage closed loop: tools generate, report packages, share recruits, new hunters hunt.">
+          <!-- clockwise steps between the four stages -->
+          <path class="fw-step" d="M170 48 A92 92 0 0 1 262 140" marker-end="url(#ah)"></path>
+          <path class="fw-step" d="M262 140 A92 92 0 0 1 170 232" marker-end="url(#ah)"></path>
+          <path class="fw-step" d="M170 232 A92 92 0 0 1 78 140" marker-end="url(#ah)"></path>
+          <path class="fw-step" d="M78 140 A92 92 0 0 1 170 48" marker-end="url(#ah)"></path>
+
+          <defs>
+            <marker id="ah" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path class="fw-arrow" d="M0 0 L8 4 L0 8 z"></path>
+            </marker>
+          </defs>
+
+          <circle class="fw-node" cx="170" cy="48" r="7"></circle>
+          <circle class="fw-node" cx="262" cy="140" r="7"></circle>
+          <circle class="fw-node" cx="170" cy="232" r="7"></circle>
+          <circle class="fw-node" cx="78" cy="140" r="7"></circle>
+
+          <text class="fw-label" x="170" y="24" text-anchor="middle">Tools generate</text>
+          <text class="fw-label" x="262" y="166" text-anchor="middle">Report packages</text>
+          <text class="fw-label" x="170" y="262" text-anchor="middle">Share recruits</text>
+          <text class="fw-label" x="78" y="166" text-anchor="middle">New hunters hunt</text>
+
+          <text class="fw-core" x="170" y="136">UNCERTAINTY</text>
+          <text class="fw-core" x="170" y="152">PROTECTED</text>
+        </svg>
+        <p style="margin:14px 0 0;font-size:.84rem;color:var(--ink-dim)">
+          Tools generate the material, the report packages it, the share card recruits,
+          and the new hunter generates more. The loop is closed by the souvenir, not by the sensor.
+        </p>
+      </div>
+
+      <div class="panelbox risk">
+        <h3>Risk register</h3>
+        <ul class="risklist">
+          <li><span class="sev">HIGH</span><span><b>The skeptic's test.</b> Any falsifiable claim kills retention and reviews inside the first 30 seconds of scrutiny.</span></li>
+          <li><span class="sev">HIGH</span><span><b>Predictability.</b> Once users decode the event engine, the magic dies and there is no second act.</span></li>
+          <li><span class="sev mid">MED</span><span><b>Feels fake when tested.</b> Tension between "no winking" immersion and openly framing the simulation.</span></li>
+          <li><span class="sev mid">MED</span><span><b>Report quality.</b> If the hero screen is weak or ugly, the entire flywheel stalls.</span></li>
+          <li><span class="sev mid">MED</span><span><b>Uncertainty vs. reward.</b> Too little happening reads as <em>broken</em>, not atmospheric.</span></li>
+          <li><span class="sev mid">MED</span><span><b>Battery.</b> Always-on sensing against a product whose best sessions are long walks.</span></li>
+          <li><span class="sev">HIGH</span><span><b>Scope.</b> Four deep creatures is far more work than forty shallow ones — and the whole bet rests on that.</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  </main>
+
+  <footer class="closing">
+    <blockquote>
+      A hunt is a promise. The report is the receipt.
+    </blockquote>
+    <div class="foot">
+      <span><b>Case</b> 2026-10-04</span>
+      <span><b>Mode</b> Autonomous ideation</span>
+      <span><b>Entries</b> 139</span>
+      <span><b>Status</b> Divergent session complete</span>
+      <span><b>Next</b> Product brief → PRD → Spec</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---- gauge ticks (drawn here so the markup stays lean) ---- */
+  var ticks = document.getElementById('ticks');
+  if (ticks){
+    var cx = 70, cy = 76, NS = 'http://www.w3.org/2000/svg';
+    for (var i = 0; i <= 10; i++){
+      var a = (180 + i * 18) * Math.PI / 180;
+      var major = (i % 5 === 0);
+      var outer = 56, inner = major ? 46 : 50;
+      var ln = document.createElementNS(NS, 'line');
+      ln.setAttribute('x1', (cx + Math.cos(a) * inner).toFixed(2));
+      ln.setAttribute('y1', (cy + Math.sin(a) * inner).toFixed(2));
+      ln.setAttribute('x2', (cx + Math.cos(a) * outer).toFixed(2));
+      ln.setAttribute('y2', (cy + Math.sin(a) * outer).toFixed(2));
+      ln.setAttribute('class', major ? 'tick major' : 'tick');
+      ticks.appendChild(ln);
+    }
+  }
+
+  /* ---- declassify toggle (only offered if there is anything to reveal) ---- */
+  var btn = document.getElementById('declass');
+  if (btn && document.querySelector('.redact')){
+    btn.hidden = false;
+    btn.addEventListener('click', function(){
+      var on = document.documentElement.classList.toggle('declassified');
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.textContent = on ? 'Re-classify' : 'Declassify redactions';
+    });
+  }
+
+  /* ---- magnetic needle drift: a slow, non-repeating wander ---- */
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var needle = document.querySelector('.needle-line');
+  if (needle && !reduce.matches){
+    var current = -58, target = -58, last = 0;
+    var setTarget = function(){
+      // never settles, never repeats: nudge toward a new bearing
+      target = -62 + Math.random() * 50;
+    };
+    setTarget();
+    setInterval(setTarget, 4200);
+    var step = function(ts){
+      if (!last) last = ts;
+      var dt = Math.min(ts - last, 80);
+      last = ts;
+      current += (target - current) * Math.min(dt / 900, 0.14);
+      needle.style.transform = 'rotate(' + current.toFixed(2) + 'deg)';
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  /* ---- the field trace drifts its own spikes, occasionally ---- */
+  var live = document.querySelector('.trace-live');
+  if (live && !reduce.matches){
+    // points as [x, y] pairs; spikes are the ones that leave the baseline
+    var pts = [
+      [0,20],[18,20],[22,16],[26,24],[30,20],[52,20],[56,9],[60,31],[64,20],
+      [92,20],[96,17],[100,23],[104,20],[136,20],[140,13],[144,27],[148,20],
+      [176,20],[180,18],[184,22],[188,20],[214,20],[218,4],[222,36],[226,20],
+      [258,20],[262,15],[266,25],[270,20],[300,20]
+    ];
+    var spikes = [6, 7, 10, 11, 14, 15, 22, 23, 26, 27];
+    var render = function(){
+      var d = 'M' + pts[0][0] + ' ' + pts[0][1].toFixed(1);
+      for (var i = 1; i < pts.length; i++){
+        d += ' L' + pts[i][0] + ' ' + pts[i][1].toFixed(1);
+      }
+      live.setAttribute('d', d);
+    };
+    setInterval(function(){
+      if (document.hidden) return;
+      var i = spikes[Math.floor(Math.random() * spikes.length)];
+      pts[i][1] = Math.max(4, Math.min(36, pts[i][1] + (Math.random() * 9 - 4.5)));
+      render();
+    }, 2600);
+  }
+})();
+</script>
+</body>
+</html>
