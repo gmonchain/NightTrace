@@ -1,13 +1,13 @@
 ---
 title: NightTrace — PRD Addendum
-status: draft
+status: final
 created: 2026-10-04
 updated: 2026-10-04
 ---
 
 # NightTrace — PRD Addendum
 
-Material that belongs downstream of the PRD, or that earned a place in the project but not in the PRD itself. Nothing here is normative for the product; it is the *how*, the *why-not*, and the depth that would have buried the PRD's main narrative.
+Material that belongs downstream of the PRD, or that earned a place in the project but not in the PRD itself. Nothing here overrides an FR; it is the *how*, the *why-not*, and the depth that would have buried the PRD's main narrative. Where a section restates a constraint the PRD already imposes — the claims boundary at §B is the case — it is elaborating that constraint, not creating a second one, and the PRD remains the source of the requirement.
 
 Read the PRD first. Where this addendum names an FR, that FR is authoritative and this document is explanatory.
 
@@ -27,7 +27,7 @@ The design brainstorm silently overrode roughly fourteen explicit demands from t
 | 2 | XP and investigator level (§20) | **Investigator Clearance** | An XP bar is the tell that you are inside a mobile game. Clearance is diegetic and advances on what the user did, not on time played. |
 | 3 | Per-hunt event probabilities (§2) | **One engine, one hazard model** | Learnable per-hunt tables destroy uncertainty. Hunts differ by archetype, toolset, channel, phase timing, and distribution shape — never by probability constants. |
 | 4 | Rarity table 55/25/12/6/2% (§2) | **Gated thresholds, not drawn** | A per-event lottery reads as arbitrary or broken. Rarity is earned by reaching thresholds. Legendary uses a separate flag at ~0.5% base. |
-| 5 | 2-minute casual session (§3) | **Field Note, ~3 minutes** | Compressing an investigation into two minutes is how a product becomes a fake radar. A Field Note is its own mode with its own framing, not a truncated case. |
+| 5 | 2-minute casual session (§3) | **Field Note, ~3 minutes** | Compressing an investigation into two minutes is how a product becomes a fake radar. A Field Note is its own mode with its own framing, not a truncated Case. |
 | 6 | `NW · 182m` distance (§14) | **8-wind bearing + range band** | Metres to a contact is the single most testable claim in the product: a user can pace the room and see the app is wrong. |
 | 7 | 23 named tools (§2) | **7 surfaces, 5 verbs** | Consolidation. The tools map to Sweep / Ask / Listen / Frame / Log. |
 | 8 | Equipment tab (§23) | **Cut; four tabs only** | Tools live inside a hunt. A tool browsed outside a hunt is an object, not an instrument. |
@@ -68,7 +68,7 @@ This is the product's most consequential constraint and the one most likely to b
 
 > **No sentence in NightTrace may assert anything about the real world.**
 
-This applies to the app UI, App Store metadata, screenshots, share output, onboarding, notifications, and support copy.
+This applies to the app UI, App Store metadata, screenshots, share output, onboarding, notifications, and support copy. The list is broad on purpose: the claim that kills a product like this is the one nobody thought of as marketing copy — a notification, a screenshot caption, a support answer — so the rule is stated as a property of every sentence the product ships rather than of a set of named surfaces.
 
 ### B.2 Banned terms, enforced as a build-failing lint
 
@@ -135,13 +135,15 @@ Reproduced from the source design doc. This is the authoritative reference for w
 
 The About notice contains: WHAT THIS IS / WHAT IT DOES / SENSORS USED (each marked "Only while in use.") / WHAT WE NEVER DO (`No account. No sign-in.` `No network connection.` `No audio or photos leave this device.` `No advertising.` `No analytics sent anywhere.`) / A NOTE ON SCIENCE / SAFETY.
 
+Three layers rather than one, because each covers a reader the others cannot reach: the store listing catches the user before install, onboarding catches the one who never opens About, and the About notice is the only layer that travels with the user's exported data — so a reader who meets a NightTrace export months later can still find the framing that made it.
+
 ### B.6 The ruling this PRD was expected to override — and does not
 
 Row 9 of the table above bans `Activity level: 93%`. The product's first design pass kept a percentage on the Case Report — the term the PRD has since retired as **Anomaly Index** — on the reasoning that a case-file index is not a sensor reading, and the owner initially ratified that. **On 2026-10-04 the owner reversed it, and the product now complies with the rulings table completely — no exception to the no-verifiable-numbers law survives on any surface.** The reversal is recorded in the PRD at §4.6 and §8 OQ-1 (closed).
 
 The reason this section still exists, in a document that otherwise records only live decisions: the "case-file index, not a measurement" argument is *plausible*, and someone downstream will rediscover it. It fails on a distinction that is easy to miss. A bare count (`EVIDENCE 05`) has no denominator and can be checked by the user sitting in the app; a percentage has one, and the denominator is what converts a fact about the session into a claim about the world. Relabelling cannot fix that, because the problem is the number's form rather than its caption. It also fails structurally: the Share Card is composed from the Case Report, so the number was never contained to the one screen carrying the disclaimer apparatus. It rode out to the most-distributed surface in the product, which arrives with no framing at all.
 
-**If you are downstream and find yourself re-proposing the percentage, read §8 OQ-1 before you do.** The strength the Case Report was reaching for is delivered by the counts, the `LOW`/`MODERATE`/`HIGH` band, the `COMPELLING`/`SUGGESTIVE`/`AMBIGUOUS` evidence grades, and the stamped status word.
+**If you are downstream and find yourself re-proposing the percentage, read §8 OQ-1 before you do.** The strength the Case Report was reaching for is delivered by the counts, the `LOW`/`MODERATE`/`HIGH` activity band, the `AMBIGUOUS`/`SUGGESTIVE`/`COMPELLING` certainty bands, and the stamped status word.
 
 ---
 
@@ -150,6 +152,8 @@ The reason this section still exists, in a document that otherwise records only 
 The PRD states what the engine must do (FR-1 … FR-5). This section records how.
 
 ### C.1 Module layout
+
+The layout below is the enforcement surface for §C.2's boundary rules: each boundary is a directory that may or may not import another, not a convention someone has to remember.
 
 ```
 engine/          pure TS. May not import react, react-native, expo*, zustand.
@@ -253,13 +257,13 @@ Measured over 500 seeded 20-minute `Present` sessions per archetype.
 ### C.7 Cooldowns and anti-repeat
 
 - A howl gets an 8-minute cooldown — one asset used sparingly.
-- Voice `ASK` locks for 12 seconds while cooling.
-- `distortion_bloom` fires at most 4× per session; the glitch colour channel at most 4×.
-- The Ambusher stall holds the proximity ladder at `WARM` for up to 4 minutes and displays `SIGNAL AGE · stale` — a designed dead end.
+- Voice `ASK` locks for 12 seconds while cooling, so a user cannot machine-gun questions and turn a ritual into a slot machine.
+- `distortion_bloom` fires at most 4× per session; the glitch colour channel at most 4×, so the strongest visual effect stays rare enough to mean something.
+- The Ambusher stall holds the proximity ladder at `WARM` for up to 4 minutes and displays `SIGNAL AGE · stale` — a designed dead end, not a bug the user should report.
 
 ### C.8 The five phases
 
-Five phases run in fixed order, with `ENDED` as the terminal state that hands off to the report:
+Five phases run in fixed order, with `ENDED` as the terminal state that hands off to the Case Report:
 
 `QUIET` (floor 45 s, median ~150 s) → `SIGNALS` (~25% of session time) → `ACTIVITY` → `ENCOUNTER_WINDOW` (60–180 s) → `RESOLUTION` → `ENDED` → report.
 
@@ -277,14 +281,14 @@ raw → EMA smoothing → rolling local baseline → delta → normalized anomal
 
 ### C.11 Radar target rules
 
-Targets have a birth, a velocity, an uncertainty, and a death. `uncertainty` only ever grows; `coneWidthDeg` narrows only through direct observation and never collapses to a lock-on. `dissolve` is the only removal. Maximum four concurrent targets in twenty minutes.
+Targets have a birth, a velocity, an uncertainty, and a death. `uncertainty` only ever grows; `coneWidthDeg` narrows only through direct observation and never collapses to a lock-on — a lock-on is a promise, and a promise is falsifiable the moment the user walks the last ten metres and finds a fence. `dissolve` is the only removal, so contact resolves into an explanation or an expiry rather than into a location. Maximum four concurrent targets in twenty minutes; a test asserts a target's uncertainty grows monotonically and that nothing is ever removed by any path but `dissolve`.
 
 ### C.12 Hard engine invariants
 
-- `EventTable.emptyWeight` is always greater than zero.
-- A `SessionDirective` may constrain the space of events; it may never name an event.
-- Archetypes emit `ArchetypeEffect` values and never touch state.
-- FKs point only within the user family. `evidence.creature_id` and `sessions.hunt_id` are validated text ids in the repository layer, precisely so that a content rebuild cannot cascade-delete user evidence.
+- `EventTable.emptyWeight` is always greater than zero. An event table that can only select events is a metronome with extra steps; making "nothing" an explicitly weighted entry is what makes Silence an authored, tunable, testable content decision rather than the absence of one.
+- A `SessionDirective` may constrain the space of events; it may never name an event. A directive that named an event would let the direction layer dictate a moment, which is the engine's job, and it would make the directive untestable against the uncertainty rule.
+- Archetypes emit `ArchetypeEffect` values and never touch state. Emitting a value rather than mutating is what lets a content drop add a behaviour through the registry without editing the engine, and it is what makes the same engine reusable for a replay viewer.
+- FKs point only within the user family. `evidence.creature_id` and `sessions.hunt_id` are validated text ids in the repository layer, precisely so that a content rebuild cannot cascade-delete user Evidence.
 
 ---
 
@@ -292,7 +296,7 @@ Targets have a birth, a velocity, an uncertainty, and a death. `uncertainty` onl
 
 ### D.1 Channels
 
-`magnetometer` (EMF, µT), `accelerometer`, `gyroscope`, `deviceMotion`, `light` (Android only), `location` (`watchPositionAsync`; iOS reduced-accuracy is first-class), `audioLevel`, `cameraState`.
+`magnetometer` (EMF, µT), `accelerometer`, `gyroscope`, `deviceMotion`, `light` (Android only), `location` (`watchPositionAsync`; iOS reduced-accuracy is first-class), `audioLevel`, `cameraState`. `sensors/` is the only module that touches any of these (§C.2).
 
 ### D.2 Rate ladder
 
@@ -350,7 +354,7 @@ This single rule resolves most storage questions. Evidence is committed **when f
 
 ### E.3 Write policy — checkpoints, not streams
 
-On session start, insert a session row with `status='active'`, `seed`, `content_version`, `hunt_id`, `started_at`, `conditions_snapshot`. Every **60 seconds**, and on backgrounding, an exclusive transaction updates elapsed time, appends a run-length-encoded tick digest, and inserts uncommitted evidence. On finish, one transaction finalises reports, discoveries, badges, and progress.
+On session start, insert a session row with `status='active'`, `seed`, `content_version`, `hunt_id`, `started_at`, `conditions_snapshot`. Every **60 seconds**, and on backgrounding, an exclusive transaction updates elapsed time, appends a run-length-encoded tick digest, and inserts uncommitted evidence. On finish, one transaction finalises the Case Report, discoveries, badges, and progression. The 60-second cadence is the crash-loss window: at worst a user loses a minute of session, which §E.2's commit-on-find rule already keeps below the threshold that would make the user angry.
 
 ### E.4 Media
 
@@ -366,7 +370,7 @@ Live sensor values, tension, radar targets, the current event, raw 100 Hz arrays
 
 ### E.7 Migration discipline
 
-Never edit a shipped migration. Every migration runs in a transaction. Additive-only for a shipped schema version; a destructive change requires a backup and a restore path. `migrate()` is idempotent, asserted by test.
+Never edit a shipped migration: a device that has already run it will not re-run it, so an edit silently forks the schema between new and existing installs. Every migration runs in a transaction. Additive-only for a shipped schema version; a destructive change requires a backup and a restore path. `migrate()` is idempotent, asserted by test.
 
 ### E.8 Storage budget
 
@@ -383,11 +387,11 @@ The media share is what makes §E.4's rule matter: media lives on disk, so the d
 
 ## F. Analytics
 
-Local-only, on-device, PII-free. No network egress. `installRef` is a random, resettable UUID. No coordinates, no free text, no media, no identifier surviving an uninstall. Exportable and erasable by the user.
+Local-only, on-device, PII-free. No network egress. `installRef` is a random, resettable UUID. No coordinates, no free text, no media, no identifier surviving an uninstall. Exportable and erasable by the user. This section documents the event set the PRD's §6.2 defers past the MVP's six core events, and it records why the deferral is a problem rather than a saving.
 
 ### F.1 The six core events
 
-The PRD's MVP scope. These are the brief's original set.
+The PRD's MVP scope. Five of these are the brief's original set minus `subscription_started`, which cannot exist in an MVP with no purchase; `paywall_viewed` is kept from the same brief even though it cannot fire, so the schema does not need a migration when monetization returns. See the PRD's §9 A-6, which is where the count matters: with the two purchase events dead, only five events are live, and five are not enough to measure SM-5, SM-6, and SM-7.
 
 `hunt_started` · `hunt_completed` · `evidence_found` · `encounter_triggered` · `report_shared` · `paywall_viewed`
 
@@ -437,7 +441,7 @@ Mic level comes from `useAudioStream()` PCM with the engine's own RMS and VAD. R
 
 ### G.3 Dev builds
 
-Expo Go is **not** the delivery target: SDK 57's Expo Go is not on the App Store, and `expo-camera` needs a dev build for real testing. Expo-managed workflow with CNG and `expo-dev-client`.
+Expo Go is **not** the delivery target: SDK 57's Expo Go is not on the App Store, and `expo-camera` needs a dev build for real testing. Expo-managed workflow with CNG and `expo-dev-client`. This is a hard constraint rather than a preference — a build that only runs in Expo Go cannot be tested against the sensor and camera path the product actually ships.
 
 ### G.4 Testing
 
@@ -453,7 +457,7 @@ The source contract's 30-day plan is one senior engineer, full time, with four b
 
 `[ASSUMPTION]` Free-at-launch removes the paywall from that critical path, which should pull the date earlier; the PRD does not restate a date, because the schedule is an implementation artifact. The PRD fixes only the *contents* of v1 (its §6.1), not when they land — the estimate above is the source contract's, and it is the one to plan against until an implementation plan replaces it.
 
-**Slip triage** is defined in the source contract with three named scenarios and pre-agreed cut lists, so a slip becomes a decision rather than a negotiation. The **never-cut list**, in priority order: (1) report and share card; (2) the four-tab structure; (3) the seeded engine and RLE replay; (4) the qualitative readout law; (5) commit-on-find; (6) just-in-time permissions; (7) the free first hunt reaching a real encounter.
+**Slip triage** is defined in the source contract with three named scenarios and pre-agreed cut lists, so a slip becomes a decision rather than a negotiation. The **never-cut list**, in priority order: (1) the Case Report and Share Card; (2) the four-tab structure; (3) the seeded engine and RLE replay; (4) the qualitative readout law; (5) commit-on-find; (6) just-in-time permissions; (7) the free first hunt reaching a real Encounter.
 
 `[NOTE FOR PM]` Item 4 on the never-cut list — the qualitative readout law — needs no carve-out. The one exception ever proposed, a percentage on the Case Report, was reversed on 2026-10-04, so the law now holds on every surface including the Case Report. The two documents no longer conflict: the PRD removed the number rather than rewrite the law around it. See §B.6 and §A.1 row 1.
 
@@ -461,13 +465,13 @@ The source contract's 30-day plan is one senior engineer, full time, with four b
 
 Signed builds for both stores; `assets/store/*`; a full string table; entertainment framing in the description; the disclaimer reachable from first launch and from Profile. A grep test rejects the banned phrases. The app must install and run offline from a clean install in airplane mode.
 
-No coordinates appear on any report. Location is reduced to a coarse bucket plus human labels, e.g. "the north side of the house". Only two free-text columns exist in the entire schema.
+No coordinates appear on any Case Report. Location is reduced to a coarse bucket plus human labels, e.g. "the north side of the house". Only two free-text columns exist in the entire schema — the count is a privacy budget, not an accident: every additional free-text column is a place a user could type something the app then has to protect.
 
 ---
 
 ## H. Accessibility
 
-- **Screen readers:** the Case Report and Field Journal are navigable with VoiceOver and TalkBack. Live regions are used only for evidence capture and phase change. **Hidden scalars are never announced** — tension, attunement, rarity, and seed never reach assistive technology.
+- **Screen readers:** the Case Report and Field Journal are navigable with VoiceOver and TalkBack. Live regions are used only for evidence capture and phase change, because an over-eager live region interrupts the user mid-flow more often than it informs them. **Hidden scalars are never announced** — Tension, Attunement, rarity, and Seed never reach assistive technology; announcing a scalar the sighted user cannot see would be a tell as well as an accessibility defect.
 - **Dynamic Type:** supported to 200%, with the intensity rail and tool row capped at 140%.
 - **Reduce Motion:** cross-fades replace transitions, the sweep becomes static, glitch is disabled and re-routed to audio, and radar dots animate statically at 0.5 Hz.
 - **Contrast:** `ink` ≈15:1, `inkDim` ≈7:1, `inkFaint` ≈3.2:1, `trace` ≈11:1, `amber` ≈8:1.

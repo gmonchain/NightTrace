@@ -1,6 +1,6 @@
 ---
 title: NightTrace — Product Requirements Document
-status: draft
+status: final
 created: 2026-10-04
 updated: 2026-10-04
 ---
@@ -71,7 +71,7 @@ The product must balance all three. The first is an authorship test and it is th
 - **Users seeking a real detector.** Anyone hoping for a device that finds ghosts. The app will not satisfy this and must not imply it can. This is a targeting boundary, not a marketing stance: attempts to satisfy this user destroy the product for everyone else.
 - **Users under 12.** Category rating is 12+/Teen. The app is atmospheric and can startle; it is not a children's toy.
 - **Users wanting social features.** No feed, no friends list, no profiles, no comparison. Sharing is one-directional and leaves the app.
-- **Users on iPad.** iPad is explicitly not a target for MVP — phone-first, portrait-locked except the Camera and Sky tools.
+- **Users hunting on a tablet.** `[NOTE FOR PM]` This is a *deferral*, not a targeting boundary, and the earlier draft's phrasing ("iPad is explicitly not a target") overstated it: an iPad user is a user who happens to hold a bigger screen, not someone the product is wrong for. The real constraint is physical. The seven tool surfaces assume a one-handed portrait grip — the Torch toggle, the hold-to-ask Voice surface, the alignment meter, and the Tracker's walking ladder are all built for a phone held in one hand in the dark — and a two-handed tablet changes the posture the mechanics depend on. iPad is therefore deferred because the mechanics would need re-authoring, not because the audience is unwanted.
 - **Users wanting a multi-hour RPG.** Progression is deliberately light; there is no XP grind, no equipment economy, no stat sheet.
 
 ### 2.3 Key User Journeys
@@ -192,6 +192,8 @@ While the user has zero sealed Cases, the system can guarantee their first Sessi
 
 **Notes:** This is the single deliberate departure from the engine's otherwise total honesty, and it is bounded to one Case. `[NOTE FOR PM]` If reviewer feedback finds first-run sessions feel different in a detectable way, the fix is to lengthen the guaranteed silence rather than to widen the guarantee.
 
+`[NOTE FOR PM]` **That remedy is worth a second look, and it is recorded here in its original form deliberately.** Adding silence at the front is the one change that makes a first session *more* like the thing the source design warns users misread as a broken app. If the real problem turns out to be that the first session does not land, the diagnosis matters more than the fix: the guarantee is not what makes it detectable — a first-run user has no second session to compare against — and the likelier detectability leak is that the pre-Encounter phase is structurally identical in every session, so a user who *has* played twice learns the shape from the shape, not from the encounter. If that is the cause, the remedy is variance in the approach to the window, not more silence before it. This note is left standing rather than rewritten because the original instinct is defensible at the time it was written and a future reader should see what was proposed alongside what replaced it.
+
 #### FR-4: Tension state
 
 The system can maintain an internal tension value that rises and falls with elapsed time, user movement, sensor anomalies, and emissions, and drives pacing, audio, haptics, and Encounter probability. Realizes UJ-2, UJ-4.
@@ -214,9 +216,12 @@ The system can use the magnetometer, accelerometer, gyroscope, motion, ambient l
 
 **Feature-specific NFRs:**
 - Battery: sensors are duty-cycled by ladder rather than run continuously; the Session offers a low-power path that keeps the loop intact.
+- **At critically low battery the app offers to seal the Case immediately, from the live Session, producing a complete report from the checkpoint rather than losing the night.** The offer is the user's to accept; the Case is never sealed automatically.
 - Performance: sensor-derived visuals must not cause a React re-render per sample.
 
 **Notes:** `[NOTE FOR PM]` The low-power battery budget was left as an open number in the source contract. It needs a target before architecture locks the sampling ladder.
+
+The critical-battery seal is the one escape hatch in the product, and it is deliberately the only one: it exists because losing a completed night's work to a dead battery is the worst outcome the app can produce, and because the save is already durable per capture (FR-18) — the report is the only part at risk. It is recorded here rather than in the battery NFR because it is a user-facing behaviour, not a performance target.
 
 #### FR-35: Named no-event outcomes
 
@@ -339,8 +344,11 @@ The user can calibrate the device, name the place, set an intention, choose an i
 - If calibration is interrupted or no magnetometer is present, the Brief completes on an inferred baseline and says so rather than failing or blocking entry.
 - The Brief can be abandoned at any point before the hold, with no Session row created.
 - A hold that is interrupted by backgrounding aborts silently and resets: entering the field is a foreground act.
+- During a Session there is exactly one way out of the field, and it is `Leave the Field`, reached from the session shell and requiring a hold. Ending a Session early is a deliberate act rather than a back gesture, and leaving seals the Case like any other ending.
 
 **Notes:** The 800 ms figure is deliberate and distinct from the 600 ms hold that seals a Case at the end of a Session. The two gestures are the product's opening and closing brackets, and the entry hold is the longer of the pair because it is crossing a threshold rather than confirming a decision.
+
+`[NOTE FOR PM]` The single deliberate exit is load-bearing and easy to lose. A back gesture or a swipe that drops the user out of a live Session converts the field into a screen they can wander away from, and it also strands the Case — the user has left but the Session never ended, so nothing is filed. One hold-to-leave, doing the same thing every time, is what makes the field feel like a place rather than a tab.
 
 #### FR-10: Intensity selection and locking
 
@@ -610,9 +618,14 @@ The user can browse their Cases, Phenomena, Evidence, and Field Notes, organized
 **Consequences (testable):**
 - The Journal is segmented into Overview, Phenomena, Evidence, and Cases.
 - Entries are grouped by night using a boundary at 04:00, so a session that runs past midnight belongs to the evening it began.
-- The Phenomena section shows discovered entries, entries seen but unidentified, and locked entries with their stated unlock requirements, plus per-Phenomenon encounter and evidence counts.
+- The Phenomena section shows discovered entries, entries seen but unidentified, and per-Phenomenon encounter and evidence counts.
+- **It shows no locked entries, no silhouettes, and no stated unlock requirements.** A Phenomena entry the user has never encountered is simply absent from the list; it is not shown greyed out, and no copy names what it would be or how it would be reached.
 - An unsealed case is signaled with a dot on the Journal tab.
 - The Journal presents a user's own historical counts; it never presents a number the user could verify against the world.
+
+**Notes:** `[NOTE FOR PM]` The locked-silhouette pattern is the standard collection-game hook and this PRD removes it, which is a real cost to the return loop and a deliberate one. A greyed-out entry labelled **Bigfoot** with an unlock condition tells the user the app has a Bigfoot in it and that filling the condition will produce one — the same structural claim FR-19 removes from the Signature strip, arriving through a different surface. It is also the mechanism that makes the Archive a checklist, and a checklist is the thing this product is built against. The `?` tile in FR-19 is what remains of the hook, and it is the strongest half of it: a gap that admits nothing.
+
+That leaves the return loop leaning on two things rather than three — the Anomaly line (FR-30) and the unsealed-case dot — which is worth weighing against SM-2. If D7 retention misses and the locked-entry pattern is proposed as the fix, the argument above is the reason it was removed, and it should be answered rather than routed around.
 
 #### FR-26: Private by default
 
@@ -790,7 +803,8 @@ No sentence anywhere in the app, its metadata, its screenshots, or its share out
 - **Hidden badges.** Deferred; the criteria engine ships, the visible badge set ships, the hidden set does not.
 - **iPad support.** Phone-first. `[NON-GOAL for MVP]`
 - **Localisation.** `[ASSUMPTION]` See §9 A-5 — v1 is English-only; the source contract contains no i18n plan and only a single-wordbank locale column. This should be confirmed, because retrofitting localization into an app whose central mechanic is a written word bank and a hand-tuned narrative template bank is materially more expensive than planning it now.
-- **Analytics beyond the six core events.** The source contract defines twenty; the brief named seven. `[ASSUMPTION]` See §9 A-6.
+- **Analytics beyond the core event set.** The source contract defines twenty events; the brief named seven. `[ASSUMPTION]` See §9 A-6 — of the brief's seven, two are purchase events that cannot fire while the app is free, leaving five, and five is not enough to measure this PRD's own secondary metrics. The event set is an open item reachable from A-6, not a settled scope line.
+- **In-session rewind or checkpoint restoration.** A Session that ends for any reason — battery, crash, the user leaving the field — produces a Case from what was captured. Nothing resumes a Session mid-stream, and there is no way back into a Session that has ended.
 - **Real weather integration.** Excluded permanently — a weather API would be a network call, and the app makes none. A local barometer proxy substitutes where available.
 
 ---
@@ -838,7 +852,7 @@ Stakes are launch-public, so these are quantitative. Every metric cross-referenc
 
 - **OQ-4. Triage's effect on status feels right but is untested.** Deriving status partly from the user's own triage verdicts (FR-21) is what makes the conclusion theirs. It may also mean a user can accidentally talk their way out of an `UNEXPLAINED`, and it may make triage feel compulsory. **Needs:** prototype evidence from the first playable report.
 
-- **OQ-5. Direction vs. discovery.** How much the app may direct the user — sweep here, ask a question — before an investigation starts to feel like a checklist rather than discovery. The four Hunts' objectives sit exactly on this line.
+- **OQ-5. Direction vs. discovery.** How much the app may direct the user — sweep here, ask a question — before an investigation starts to feel like a checklist rather than discovery. The four Hunts' objectives sit exactly on this line. **This now has a second and more concrete form:** FR-9 makes calibration, a place name, and an intention mandatory before a Session begins, which means the app directs the user *before* it has given them any reason to trust it, and the first ninety seconds of the first Session are a form, a hold, and a silence floor. There is a live proposal to add a micro-directive at roughly the ninety-second mark — one short line telling the user to sweep, sit, or ask, which the design doc carried and this PRD dropped. It is a direct trade against the law that a tool used inside a hunt is an instrument and a directive is a checklist, and it is unresolved on purpose. **Needs:** a playtest decision on whether the opening needs one directive or none.
 
 - **OQ-6. Encounter rate calibration in the field.** The 42–58% band (SM-4) is a tuning target derived from simulation, not from real users. It should be re-derived after the first hundred real sessions, and specifically checked against the risk that a *correct* rate still reads as "broken" to a user who has had two quiet nights in a row.
 
