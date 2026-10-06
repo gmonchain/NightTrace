@@ -472,8 +472,8 @@ that asserts anything about the real world.
 ### Story 1.1: The app installs and runs on a real device, with the guardrails already wired
 
 As a **developer on this project**,
-I want a greenfield Expo project that builds to a real device with its type, lint, test and native-config
-guardrails already in place,
+I want a greenfield Expo project that builds to a real device with its type, lint, test, CI and
+native-config guardrails already in place,
 So that every story after this one inherits enforcement instead of accumulating debt that has to be
 retrofitted across five finished epics.
 
@@ -484,12 +484,26 @@ retrofitted across five finished epics.
 **Then** dependencies install and the app launches on a physical iOS device and a physical Android device
 **And** `node_modules` contains no starter-template residue — this is a from-scratch scaffold, because
 `ARCHITECTURE-SPINE.md` specifies no starter template
+**And** the stack matches the spine: `expo@57.0.26` (SDK 57 — SDK 58 is beta only and is not adopted),
+React Native 0.86.3, React 19.2.3, Node ≥ 22.13
 
 **Given** the project is bootstrapped
 **When** `npx expo prebuild` is run
 **Then** `ios/` and `android/` are generated from `app.config.ts` and are gitignored
 **And** `app.config.ts` is the only source of native configuration truth — no native config value is
 edited by hand in a generated project
+**And** the store floors are pinned in config rather than discovered at submission: iOS 16.4+ built
+against the iOS 26 SDK (required since 2026-04-28) and Android compile/target SDK 36, per AD-23
+
+**Given** CI is the enforcement locus for the gates this architecture names, per AD-30
+**When** the pipeline is inspected
+**Then** a committed CI configuration exists and is the only place these gates are declared as blocking
+**And** it runs both Jest projects, the ESLint boundary rules, the token-sync test (AD-17), the claims
+lint (AD-16), the content-validation and alias tests, migration idempotency (AD-22), and the
+golden-seed replay (AD-3)
+**And** a gate may not be described as "CI-blocking" until this pipeline runs it — a rule that names a
+gate and no pipeline is unenforceable
+**And** the provider is Deferred and recorded as such; only its absence would be the defect
 
 **Given** TypeScript is configured
 **When** `tsc --noEmit` runs
@@ -505,6 +519,9 @@ with arrows pointing only downward and `src/engine/**` at the bottom
 `src/engine/**`, per AD-1
 **And** an import of `react`, `react-native`, `expo*` or `zustand` from anywhere under `src/engine/**`
 fails lint with a message naming AD-1
+**And** `no-restricted-syntax` enforces AD-12's SQL containment — a SQL string literal outside
+`src/db/repositories/**` fails lint, including in a route under `src/app/**`
+**And** `console.*` is banned throughout `src/` except in `src/services/Logger.ts`
 
 **Given** Jest is configured
 **When** `npm test` runs
@@ -517,6 +534,13 @@ test configuration is itself a boundary check
 **Then** dev, preview and production profiles exist
 **And** Expo Go is not a delivery target and EAS is not in the release path, per AD-23
 
+**Given** builds run locally and fastlane owns signing and store submission for both platforms, per AD-23
+**When** the repository root is inspected
+**Then** `fastlane/` sits at the root and never inside the generated `ios/` or `android/`, because
+`expo prebuild --clean` deletes those directories and would destroy anything committed there
+**And** no certificate, provisioning profile, keystore or fastlane credential is committed anywhere in
+the tree
+
 **Given** the app needs to remember small state before any database table exists
 **When** settings storage is set up
 **Then** it uses `expo-sqlite/kv-store` behind a typed `db/kv.ts` wrapper
@@ -524,6 +548,22 @@ test configuration is itself a boundary check
 because there is no settings table by design
 **And** the wrapper is available from this story onward so no later story has to introduce a second
 settings mechanism
+
+**Given** the foundation primitives every later epic imports
+**When** they are inspected
+**Then** `src/util/result.ts` exports `Result<T, E>` for recoverable paths and `invariant()` for
+programmer error, and no service throws across its boundary for an expected condition
+**And** `src/services/Logger.ts` is the only module that logs, and its logs never contain evidence
+content, coordinates, or free text — it is also AD-30's entire crash story, since there is no
+third-party crash reporter and an interrupted session is recovered from its own checkpoint
+**And** `src/services/IdFactory.ts` is the only producer of ids, opaque strings at runtime and branded
+types at compile time
+
+**Given** the model conventions every later story inherits, per AD-14
+**When** the conventions are inspected
+**Then** every id is a branded type and no id is a bare `string`
+**And** absence is spelled `null` and never `undefined` — a `null` is a claim, not an omission
+**And** no `any` exists, and no `as` cast is admissible outside `src/db/mappers/**` and validator output
 
 **Given** a haptic call, an audio play, a SQLite write and a `ViewShot.capture` call are each attempted
 inside `src/engine/**` in a scratch branch
@@ -562,6 +602,8 @@ and `stamp` (26 mono 600) all exist with their letter-spacing and weight
 **Then** `quick` 120ms, `base` 180ms, `enter` 240ms, `screen` 380ms, `seal` 900ms exist
 **And** the named animations `ntBreathe` (5s), `ntDot` (3s), `ntPulse` (2s), `ntUp` (240ms),
 `ntFade` (240ms) are exported
+**And** the export matrix carries the rate ceiling as a testable claim rather than a comment: `ntPulse`
+at 2s is the only animation faster than the 5s field breath
 
 **Given** the radius scale
 **When** tokens are inspected
@@ -569,10 +611,34 @@ and `stamp` (26 mono 600) all exist with their letter-spacing and weight
 **And** a lint or review rule states that no control is a capsule and nothing in a document surface
 is fully rounded
 
+**Given** the `components:` block in `DESIGN.md`'s frontmatter
+**When** the token module is written
+**Then** every component token it defines is present and typed: `rule` and `rule-soft` heights,
+`seal` (`ring`, `ink`, `rotation`, `distortion`), `stat-cell`, `signature-slot` (`size`, `lit`, `unlit`,
+`litBorder`), `ledger-row`, `evidence-card`, `chip`, `hold-button` (including its 50px height and the
+800 ms / 600 ms fill durations), `sheet`, `tab-bar`, and `grain.opacity`
+**And** the `ntInk` turbulence-and-displacement filter is a token, not an inline effect, so the same
+filter is shareable with the `REVISED` stamp
+**And** `{components.grain.opacity}` is `.55` and the sync test covers it — raising it is a defect,
+not a preference
+
 **Given** the token-sync test exists
 **When** a developer changes any token value in `DESIGN.md` without changing `tokens.ts` (or the reverse)
 **Then** CI fails, naming the token, the design value and the code value, per AD-17
 **And** the test asserts there is no light theme — the app is dark-only
+**And** a second palette appearing in either source fails it, because the token set's completeness is
+itself asserted
+
+**Given** AD-17 requires that components read tokens and never hard-code a raw value
+**When** any file under `src/ui/**` is inspected
+**Then** a lint rule fails on a raw hex colour, a raw px dimension, or a literal duration outside
+`src/ui/theme/**`
+**And** the rule applies from this story onward, so no later epic has to retrofit it
+
+**Given** **no information is conveyed by colour alone** — a rule the token sync structurally cannot check
+**When** this story is considered complete
+**Then** it is recorded as a named review item with an owner, per AD-17 and AD-28
+**And** the item states its own limit: every status must also be a word, and colour only reinforces it
 
 **Given** the shadow rule
 **When** any UI code is reviewed
@@ -587,6 +653,34 @@ is fully rounded
 from an assumed 5.6:1
 **And** `ash` is documented as the floor for anything a user must read, with `dim` permitted only for
 non-actionable captions
+
+**Given** `DESIGN.md` leaves the mono face's exact family open and the serif/mono split is not negotiable
+**When** the token module is written
+**Then** the serif resolves to `Newsreader` and the mono carries `IBM Plex Mono` at the frontmatter's
+stated size, weight and tracking
+**And** the family name is a single token, so adopting a different mono later is a one-token change the
+sync test then enforces on both sides
+**And** the load-bearing rule is documented: serif means written by a person, mono means recorded by
+the machine
+
+**Given** `DESIGN.md`'s open question on legibility at the floor — the prototype sets some mono at
+7.5px and 8px against the ramp's stated 9.5px floor
+**When** the question is resolved
+**Then** the 9.5px floor holds and no shipped string is set below it
+**And** the tightest metadata blocks are allowed to reflow rather than being exempted
+**And** the Share Card footer — which carries the entertainment line — is **measured** at the smallest
+supported text configuration and asserted legible and untruncated, because UX-DR55 makes that line a
+safety notice rather than decoration
+
+**Given** `DESIGN.md`'s open question on the safelight hue — its rationale argues for a deep red on
+dark-adaptation grounds while the implemented token is lime, and AD-20 records this as unresolved
+**When** the tokens ship
+**Then** `safelight` carries the implemented value and the contradiction is **not** shipped as a
+rationale, because a rationale that contradicts its own token is worse than none
+**And** the hue is recorded as an open question owned by the design owner, with the `safelight` token
+*name* stable so code is unaffected either way
+**And** `safelight` remains reserved without exception for recorded moments and is never decorative,
+atmospheric, or brand
 
 ### Story 1.3: The document components render the product's typographic language
 
