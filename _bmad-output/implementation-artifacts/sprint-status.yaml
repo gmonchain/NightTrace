@@ -1,0 +1,106 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 10-06-2026 11:39
+last_updated: 10-06-2026 11:39
+project: NightTrace
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+development_status:
+  epic-1: backlog
+  1-1-the-app-installs-and-runs-on-a-real-device-with-the-guardrai: backlog
+  1-2-the-design-tokens-exist-and-a-test-proves-they-match-the-des: backlog
+  1-3-the-document-components-render-the-product-s-typographic-lan: backlog
+  1-4-the-interaction-components-gate-gestures-and-never-indicate: backlog
+  1-5-the-build-refuses-to-ship-a-sentence-that-asserts-anything-a: backlog
+  1-6-a-first-time-user-learns-the-frame-before-their-first-sessio: backlog
+  1-7-the-notice-stays-reachable-and-travels-with-the-user-s-data: backlog
+  1-8-the-four-tab-shell-exists-and-holds-exactly-four-tabs: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-the-same-seed-always-produces-the-same-session: backlog
+  2-2-emissions-can-be-replayed-but-cannot-be-learned: backlog
+  2-3-the-session-advances-through-a-phase-ladder-while-a-hidden-t: backlog
+  2-4-every-sensor-channel-reports-its-own-state-and-none-of-them: backlog
+  2-5-the-database-persists-what-matters-and-can-recompute-what-do: backlog
+  2-6-the-brief-prepares-the-user-and-the-place-before-anything-be: backlog
+  2-7-intensity-is-chosen-once-and-then-locked-and-its-promise-is: backlog
+  2-8-the-session-presenter-is-the-single-node-that-turns-emission: backlog
+  2-9-home-starts-a-night-resumes-one-and-reads-the-day-s-anomaly: backlog
+  2-10-a-field-note-is-a-standing-observation-that-produces-no-case: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-evidence-is-committed-the-moment-it-is-captured: backlog
+  3-2-the-signature-converges-without-ever-concluding: backlog
+  3-3-some-evidence-is-planted-and-the-user-is-the-one-who-disprov: backlog
+  3-4-the-verdict-is-the-user-s-and-the-app-never-presents-it-as-i: backlog
+  3-5-status-is-derived-from-what-happened-and-what-the-user-decid: backlog
+  3-6-a-session-that-produced-nothing-is-named-not-generalized: backlog
+  3-7-the-case-report-is-a-document-not-a-dashboard: backlog
+  3-8-the-report-can-say-what-was-not-recorded: backlog
+  3-9-a-night-that-produced-nothing-is-one-of-the-best-screens-in: backlog
+  3-10-sealing-freezes-the-record-and-an-encounter-is-never-a-pop-u: backlog
+  3-11-the-share-card-leaves-the-app-clean-and-carries-no-attributi: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-every-tool-is-one-gesture-away-and-none-of-them-is-a-dead-en: backlog
+  4-2-emf-sweeps-for-a-field-reading-and-never-shows-a-number: backlog
+  4-3-radar-shows-uncertainty-as-geometry-and-never-locks-on: backlog
+  4-4-voice-asks-a-question-and-the-app-stays-silent: backlog
+  4-5-evp-records-marks-and-attributes-nothing-to-itself: backlog
+  4-6-the-camera-is-deliberately-restrained-and-never-shows-a-head: backlog
+  4-7-the-tracker-states-its-own-limitation-on-its-own-surface: backlog
+  4-8-the-sky-label-travels-with-the-capture-in-the-pixels: backlog
+  4-9-no-tool-surface-can-render-a-measurement: backlog
+  4-10-every-permission-denial-produces-a-working-first-class-alter: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-a-user-s-first-session-is-guaranteed-to-reach-a-real-encount: backlog
+  5-2-four-archetypes-with-distinct-behaviour-and-an-engine-that-d: backlog
+  5-3-a-new-phenomenon-ships-as-content-and-broken-content-fails-t: backlog
+  5-4-each-hunt-binds-differently-and-every-hunt-is-winnable-witho: backlog
+  5-5-shadow-person-runs-noticing-in-reverse-and-the-app-never-exp: backlog
+  5-6-bigfoot-needs-the-camera-live-and-the-alien-never-says-a-wor: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-the-journal-is-four-segments-grouped-by-night-and-a-deleted: backlog
+  6-2-an-unencountered-phenomenon-is-absent-never-locked: backlog
+  6-3-the-journal-can-never-be-made-public-or-social: backlog
+  6-4-export-produces-something-readable-and-deletion-tells-the-tr: backlog
+  6-5-clearance-advances-on-what-was-sealed-not-on-time-spent: backlog
+  6-6-a-streak-displays-and-a-missed-night-costs-nothing: backlog
+  6-7-a-quiet-night-is-counted-as-a-night-not-as-a-failure: backlog
+  epic-6-retrospective: optional
