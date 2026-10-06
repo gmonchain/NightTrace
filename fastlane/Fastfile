@@ -1,0 +1,88 @@
+# fastlane Fastfile — signing and store submission for both platforms.
+#
+# Lives at the repository root, never inside ios/ or android/: CNG regenerates
+# those from app.config.ts and `expo prebuild --clean` deletes them, so anything
+# committed there is destroyed on the next prebuild (ARCHITECTURE-SPINE.md
+# AD-23).
+#
+# Builds run locally. EAS is not in the path. This file owns signing and
+# submission; it owns no build configuration — that is app.config.ts alone.
+
+require_relative 'Variant'
+
+def variant
+  NightTrace
+end
+
+default_platform(:ios)
+
+# The generated projects are produced by CNG, not committed; every lane ensures
+# they exist before it touches them. `--clean` regenerates from app.config.ts, so
+# the APP_VARIANT of this run is what the native project gets.
+def ensure_native_project(platform)
+  sh("npx expo prebuild --clean --platform #{platform}")
+end
+
+# Signing lanes run only with an explicit APP_VARIANT, so an unset variable
+# cannot sign a dev binary under the production identity.
+def assert_variant_set!
+  NightTrace.assert_variant_set!
+end
+
+platform :ios do
+  desc 'Generate the iOS project and sign the app locally'
+  lane :sign do
+    assert_variant_set!
+    ensure_native_project('ios')
+    # Certificates and profiles come from the keychain / match storage outside
+    # this repository. `sigh` and `cert` are the local equivalents; a team that
+    # keeps them in match should uncomment the sync below.
+    #
+    # match(type: 'appstore', readonly: true)
+    build_app(
+      scheme: NightTrace.ios_scheme,
+      export_method: 'app-store',
+      output_directory: 'build/ios'
+    )
+  end
+
+  desc 'Upload the signed iOS build to TestFlight / App Store Connect'
+  lane :submit do
+    assert_variant_set!
+    ensure_native_project('ios')
+    deliver(
+      submit_for_review: false,
+      automatic_release: false,
+      force: true,
+      skip_metadata: true,
+      skip_screenshots: true
+    )
+  end
+end
+
+platform :android do
+  desc 'Generate the Android project and sign the release AAB locally'
+  lane :sign do
+    assert_variant_set!
+    ensure_native_project('android')
+    # `gradle` populates SharedValues::GRADLE_AAB_OUTPUT_PATH for the rest of
+    # this lane run; `submit` must build the same artifact, not read a value only
+    # this lane set.
+    gradle(
+      task: 'bundle',
+      build_type: 'Release',
+      project_dir: 'android'
+    )
+  end
+
+  desc 'Upload the signed Android bundle to Google Play'
+  lane :submit do
+    assert_variant_set!
+    # A fresh checkout has no signed artifact, and `upload_to_play_store` reads
+    # `lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]`, which only a `gradle`
+    # action in this same run populates. Compose the lane rather than passing a
+    # nil path.
+    sign
+    upload_to_play_store(track: 'internal')
+  end
+end

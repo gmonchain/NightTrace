@@ -1,0 +1,65 @@
+name: CI
+
+# The enforcement locus (ARCHITECTURE-SPINE.md AD-30).
+#
+# This file is the only place gates are declared blocking. A gate may not be
+# described as CI-blocking until this pipeline runs it, so gates belonging to
+# later stories are appended here by the story that builds them:
+#
+#   - token sync (AD-17)                 — Story 1.2
+#   - claims lint (AD-16)                — Story 1.5
+#   - content validation + aliases (AD-9, AD-18) — Story 3.1 (emission bank,
+#     glyph set); the Alien-voice half lands in Story 5.6
+#   - migration idempotency (AD-22)      — Story 2.5
+#   - golden-seed replay (AD-3)          — Story 2.2
+#
+# No placeholder gate is declared here: an unimplemented gate that passes reads
+# as coverage, which is worse than an absent one.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: the pipeline only reads the checkout. The repository default
+# grants more than `verify` needs, and an unbounded job can sit for the
+# six-hour default, so the job carries its own wall-clock ceiling too.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: typecheck · lint · test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `verify` is typecheck + lint + test; the two Jest projects are the
+      # `test` step's own project list, and the ESLint boundary rules run as
+      # part of `lint` and again, per fixture, in the boundary test.
+      - name: Verify
+        run: npm run verify
+
+      # The launch AC's only CI-visible proxy. `verify` cannot see a broken
+      # route tree: expo-router scans `src/app/**` with `require.context`, so a
+      # file under it importing a module that does not exist fails the bundle
+      # while every unit test stays green. A loopback added route fixtures
+      # under `src/app/**` and took this export from exit 0 to exit 1 with a
+      # fully green suite — this step is what makes that failure CI-visible.
+      - name: Bundle (iOS export)
+        run: npm run bundle

@@ -1,0 +1,27 @@
+# fastlane Appfile — per-platform identity.
+#
+# Every value is read from the environment. No certificate, provisioning
+# profile, keystore, or fastlane credential is committed anywhere in this tree
+# (ARCHITECTURE-SPINE.md AD-30). Signing material lives outside the repository
+# and outside the generated ios/ and android/ directories, which
+# `expo prebuild --clean` deletes.
+#
+# The default app identifier is derived from APP_VARIANT through the same table
+# app.config.ts uses (fastlane/Variant.rb). It is NOT the production id: with
+# APP_VARIANT unset the build is the dev variant, and a production default here
+# would sign a dev binary under the production identity. `NIGHTTRACE_APP_IDENTIFIER`
+# still overrides it for a team that needs an explicit id.
+
+require_relative 'Variant'
+
+app_identifier(ENV['NIGHTTRACE_APP_IDENTIFIER'] || NightTrace.bundle_identifier)
+
+# iOS — supply these in the environment (or a local, gitignored .env), never here.
+apple_id(ENV['NIGHTTRACE_APPLE_ID']) if ENV['NIGHTTRACE_APPLE_ID']
+team_id(ENV['NIGHTTRACE_TEAM_ID']) if ENV['NIGHTTRACE_TEAM_ID']
+itc_team_id(ENV['NIGHTTRACE_ITC_TEAM_ID']) if ENV['NIGHTTRACE_ITC_TEAM_ID']
+
+# Android — a path to the Play service-account JSON, which lives outside the repo.
+for_platform :android do
+  json_key_file(ENV['NIGHTTRACE_PLAY_JSON_KEY']) if ENV['NIGHTTRACE_PLAY_JSON_KEY']
+end

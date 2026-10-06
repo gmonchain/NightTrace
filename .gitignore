@@ -1,3 +1,55 @@
+# Dependencies
+node_modules/
+
+# Expo / Metro
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.metro-health-check*
+
+# Generated native projects — CNG generates these from app.config.ts.
+# They are never committed (ARCHITECTURE-SPINE.md AD-23).
+ios/
+android/
+
+# Signing material — never enters the repository (AD-23, AD-30).
+# Covers the private-key/keystore forms and the bare-certificate and staging
+# forms a developer actually drops on disk.
+*.jks
+*.keystore
+*.p8
+*.p12
+*.key
+*.pem
+*.mobileprovision
+*.cer
+*.der
+*.cert
+*.csr
+*.provisionprofile
+google-services.json
+*.orig.*
+
+# fastlane credentials and output
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+fastlane/*.env
+fastlane/.env*
+# A Play service-account key dropped into the lane directory.
+fastlane/*.json
+
+# Signed .ipa/.aab output trees fastlane writes to.
+build/
+
+# Environment
+.env*
+
+# TypeScript
+*.tsbuildinfo
+
 # macOS
 .DS_Store
 .AppleDouble
