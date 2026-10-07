@@ -12,6 +12,11 @@ name: CI
 #   - migration idempotency (AD-22)      — Story 2.5
 #   - golden-seed replay (AD-3)          — Story 2.2
 #
+# Story 1.4's grain-reproducibility gate (`npm run grain:check`) is appended
+# below: the committed tile must regenerate byte-for-byte from
+# `scripts/generate-grain.mjs`, so the asset cannot drift from its authoring
+# script.
+#
 # No placeholder gate is declared here: an unimplemented gate that passes reads
 # as coverage, which is worse than an absent one.
 #
@@ -59,6 +64,12 @@ jobs:
       # part of `lint` and again, per fixture, in the boundary test.
       - name: Verify
         run: npm run verify
+
+      # The grain tile's byte-for-byte reproducibility gate. `verify` cannot see
+      # a drifted `assets/grain.png`, so this step is what makes the drift
+      # CI-visible.
+      - name: Grain tile is reproducible
+        run: npm run grain:check
 
       # The launch AC's only CI-visible proxy. `verify` cannot see a broken
       # route tree: expo-router scans `src/app/**` with `require.context`, so a

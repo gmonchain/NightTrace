@@ -1,11 +1,18 @@
 import { render } from '@testing-library/react-native';
+import { Text } from 'react-native';
 
 import { Chip } from '../Chip';
+import { EvidenceCard } from '../EvidenceCard';
+import { FieldView } from '../FieldView';
+import { GrainOverlay } from '../GrainOverlay';
+import { HoldButton } from '../HoldButton';
 import { LedgerRow } from '../LedgerRow';
 import { Rule } from '../Rule';
 import { Seal } from '../Seal';
+import { Sheet } from '../Sheet';
 import { SignatureStrip } from '../SignatureStrip';
 import { StatCell } from '../StatCell';
+import { TAB_IDS, TabBar } from '../TabBar';
 import type { JsonNode } from 'test-renderer';
 import { find, flatten, testCase, textContent } from './tree';
 
@@ -96,6 +103,97 @@ describe('the accessibility contract', () => {
     expect(getByLabelText('3 signature slots, 1 unidentified')).toBeTruthy();
   });
 
+  it('HoldButton announces its own label as a word', async () => {
+    const { getByLabelText } = await render(
+      <HoldButton
+        variant="enter"
+        label="HOLD TO ENTER THE FIELD"
+        onComplete={() => {}}
+        onCancel={() => {}}
+      />,
+    );
+    expect(getByLabelText('HOLD TO ENTER THE FIELD')).toBeTruthy();
+  });
+
+  it('Sheet hides its decorative scrim and grabber but keeps its content announced', async () => {
+    const { toJSON, getByText } = await render(
+      <Sheet>
+        <Text>SHEET BODY</Text>
+      </Sheet>,
+    );
+    expect(getByText('SHEET BODY')).toBeTruthy();
+    const hidden = flatten(toJSON()).filter(
+      (element) =>
+        element.props.accessibilityElementsHidden === true &&
+        element.props.importantForAccessibility === 'no-hide-descendants',
+    );
+    // The scrim and the grabber bar are decoration (AD-28) — exactly two, so a
+    // third decorative node (or a lost one) fails.
+    expect(hidden).toHaveLength(2);
+  });
+
+  it('TabBar announces each tab label as a word', async () => {
+    const { getByLabelText } = await render(
+      <TabBar activeTab="HOME" onSelect={() => {}} />,
+    );
+    for (const id of TAB_IDS) {
+      expect(getByLabelText(id)).toBeTruthy();
+    }
+  });
+
+  it('TabBar announces the unsealed case as a word, never colour alone', async () => {
+    const { getByLabelText } = await render(
+      <TabBar activeTab="HOME" onSelect={() => {}} unsealedCase />,
+    );
+    expect(getByLabelText('FIELD JOURNAL, case unsealed')).toBeTruthy();
+  });
+
+  it('FieldView announces its state word and hides the decorative rings', async () => {
+    const { toJSON, getByText } = await render(<FieldView state="CONTACT" />);
+    expect(getByText('CONTACT')).toBeTruthy();
+    const hidden = find(
+      toJSON(),
+      (element) =>
+        element.props.accessibilityElementsHidden === true &&
+        element.props.importantForAccessibility === 'no-hide-descendants',
+    );
+    expect(hidden).toBeDefined();
+  });
+
+  it('GrainOverlay is hidden from assistive technology', async () => {
+    const { toJSON } = await render(<GrainOverlay />);
+    expect(toJSON()?.props.accessibilityElementsHidden).toBe(true);
+    expect(toJSON()?.props.importantForAccessibility).toBe(
+      'no-hide-descendants',
+    );
+    expect(toJSON()?.props.accessible).toBe(false);
+  });
+
+  it('EvidenceCard announces its type label, meta rows and actions', async () => {
+    const { getByText } = await render(
+      <EvidenceCard
+        typeLabel="FRAME"
+        certainty="SUGGESTIVE"
+        channel="Camera · captured"
+        possibleMatch="No match on file"
+        onResolve={() => {}}
+      />,
+    );
+    for (const word of [
+      'FRAME',
+      'Certainty',
+      'SUGGESTIVE',
+      'Channel',
+      'Camera · captured',
+      'Possible match',
+      'No match on file',
+      'Keep',
+      'Mark as explained',
+    ]) {
+      expect(getByText(word)).toBeTruthy();
+    }
+  });
+
   const CASES: readonly (readonly [string, React.JSX.Element])[] = [
     testCase('Rule', <Rule />),
     testCase('Chip', <Chip label="REVISED" />),
@@ -114,6 +212,30 @@ describe('the accessibility contract', () => {
       />,
     ),
     testCase('Seal', <Seal status="INCONCLUSIVE" />),
+    testCase(
+      'HoldButton',
+      <HoldButton
+        variant="seal"
+        label="SEAL & FILE"
+        onComplete={() => {}}
+        onCancel={() => {}}
+      />,
+    ),
+    testCase(
+      'TabBar',
+      <TabBar activeTab="HOME" onSelect={() => {}} unsealedCase />,
+    ),
+    testCase('FieldView', <FieldView state="QUIET" />),
+    testCase(
+      'EvidenceCard',
+      <EvidenceCard
+        typeLabel="FRAME"
+        certainty="AMBIGUOUS"
+        channel="Camera · captured"
+        possibleMatch="No match on file"
+        onResolve={() => {}}
+      />,
+    ),
   ];
 
   for (const [name, element] of CASES) {

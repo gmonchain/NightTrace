@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ignore-pattern 'src/**/__boundary_fixtures__/**'",
     "test": "jest",
+    "grain:check": "node scripts/check-grain.mjs",
     "verify": "npm run typecheck && npm run lint && npm run test",
     "bundle": "expo export --platform ios"
   },

@@ -1,3 +1,4 @@
+import { AccessibilityInfo, Animated } from 'react-native';
 import type { JsonElement, JsonNode } from 'test-renderer';
 
 /**
@@ -133,4 +134,61 @@ export function withProperty(
   } finally {
     Reflect.set(target, key, original);
   }
+}
+
+/**
+ * The motion seam every story-1.4 suite drives. `Animated.timing`'s config, as a
+ * suite asserts it against the tokens; and the completion callback its `start`
+ * receives.
+ */
+export type TimingConfig = Parameters<typeof Animated.timing>[1];
+export type TimingStartCallback = (result: { finished: boolean }) => void;
+
+/**
+ * Replace `AccessibilityInfo.isReduceMotionEnabled` with a fixed answer, and
+ * return a restore callback. Hoisted here so every suite drives the same seam
+ * rather than installing its own copy.
+ */
+export function setReduceMotion(value: boolean): () => void {
+  const original = AccessibilityInfo.isReduceMotionEnabled;
+  Reflect.set(AccessibilityInfo, 'isReduceMotionEnabled', () =>
+    Promise.resolve(value),
+  );
+  return () => {
+    Reflect.set(AccessibilityInfo, 'isReduceMotionEnabled', original);
+  };
+}
+
+/**
+ * A no-op `Animated.timing` spy: it records every config it is handed, the last
+ * `start` callback and how many times an animation was stopped. The real driver
+ * is mocked out so an entrance never advances and a suite can assert the config
+ * it was given.
+ */
+export function spyOnTiming(): {
+  readonly timing: jest.SpyInstance;
+  readonly configs: () => readonly TimingConfig[];
+  readonly lastCallback: () => TimingStartCallback | null;
+  readonly stopCount: () => number;
+} {
+  let callback: TimingStartCallback | null = null;
+  let stops = 0;
+  const timing = jest.spyOn(Animated, 'timing').mockImplementation(() => ({
+    start: (started?: TimingStartCallback) => {
+      callback = started ?? null;
+    },
+    stop: () => {
+      stops += 1;
+    },
+    reset: () => {},
+  }));
+  return {
+    timing,
+    configs: () =>
+      timing.mock.calls
+        .map((call) => call[1])
+        .filter((config): config is TimingConfig => config !== undefined),
+    lastCallback: () => callback,
+    stopCount: () => stops,
+  };
 }

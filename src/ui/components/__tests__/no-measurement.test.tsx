@@ -1,11 +1,18 @@
 import { render } from '@testing-library/react-native';
+import { Text } from 'react-native';
 
 import { CHIP_LABELS, Chip } from '../Chip';
+import { EVIDENCE_CERTAINTIES, EvidenceCard } from '../EvidenceCard';
+import { FIELD_STATES, FieldView } from '../FieldView';
+import { GrainOverlay } from '../GrainOverlay';
+import { HOLD_VARIANTS, HoldButton } from '../HoldButton';
 import { LEDGER_VERDICTS, LedgerRow } from '../LedgerRow';
 import { RULE_VARIANTS, Rule } from '../Rule';
 import { SEAL_STATUSES, Seal } from '../Seal';
+import { Sheet } from '../Sheet';
 import { SignatureStrip } from '../SignatureStrip';
 import { STAT_CELL_LABELS, StatCell } from '../StatCell';
+import { TAB_IDS, TabBar } from '../TabBar';
 import type { JsonNode } from 'test-renderer';
 import { find, flatten, propStrings, styleProps, testCase } from './tree';
 
@@ -20,9 +27,11 @@ import { find, flatten, propStrings, styleProps, testCase } from './tree';
  *
  * The **accepts** clause is scoped to value-shaped props — the number- and
  * union-typed channels that could carry a measurement — and is proven by the
- * `@ts-expect-error` lines below. Authored copy that is *not* value-shaped
- * (`LedgerRow`'s free-text `glyph`, `typeLabel` and `time`) is covered by the
- * run's measurement scan of the rendered output, not by a closed type.
+ * `@ts-expect-error` lines below. Authored copy that is *not* value-shaped is
+ * covered by the run's measurement scan of the rendered output, not by a closed
+ * type: `LedgerRow`'s free-text `glyph`, `typeLabel` and `time`, and
+ * `EvidenceCard`'s free-text `typeLabel`, `channel` and `possibleMatch`, are all
+ * rendered below so the scan actually sees them.
  */
 
 /** A number followed by a percent, a unit suffix, a degree or a distance unit. */
@@ -142,6 +151,61 @@ const CASES: readonly (readonly [string, React.JSX.Element])[] = [
   ...SEAL_STATUSES.map((status) =>
     testCase(`Seal ${status}`, <Seal status={status} />),
   ),
+  // Story 1.4 — the interaction components.
+  ...HOLD_VARIANTS.map((variant) =>
+    testCase(
+      `HoldButton ${variant}`,
+      <HoldButton
+        variant={variant}
+        label="HOLD TO ENTER THE FIELD"
+        onComplete={() => {}}
+        onCancel={() => {}}
+      />,
+    ),
+  ),
+  testCase(
+    'Sheet',
+    <Sheet>
+      <Text>SHEET BODY</Text>
+    </Sheet>,
+  ),
+  ...TAB_IDS.map((activeTab) =>
+    testCase(
+      `TabBar ${activeTab}`,
+      <TabBar activeTab={activeTab} onSelect={() => {}} />,
+    ),
+  ),
+  testCase(
+    'TabBar unsealed',
+    <TabBar activeTab="FIELD JOURNAL" onSelect={() => {}} unsealedCase />,
+  ),
+  ...FIELD_STATES.map((state) =>
+    testCase(`FieldView ${state}`, <FieldView state={state} />),
+  ),
+  testCase('GrainOverlay', <GrainOverlay />),
+  ...EVIDENCE_CERTAINTIES.map((certainty) =>
+    testCase(
+      `EvidenceCard ${certainty}`,
+      <EvidenceCard
+        typeLabel="FRAME"
+        certainty={certainty}
+        channel="Camera · captured"
+        possibleMatch="No match on file"
+        onResolve={() => {}}
+      />,
+    ),
+  ),
+  testCase(
+    'EvidenceCard capture',
+    <EvidenceCard
+      typeLabel="FRAME"
+      certainty="AMBIGUOUS"
+      channel="Camera · captured"
+      possibleMatch="No match on file"
+      onResolve={() => {}}
+      capture
+    />,
+  ),
 ];
 
 describe('no component renders a measurement', () => {
@@ -174,8 +238,8 @@ describe('no component renders a measurement', () => {
  * unions). Each `@ts-expect-error` line *is* the assertion: it is a
  * `tsc --noEmit` failure if the escape it forbids is ever added to a prop. The
  * runtime call proves only that the array was built — the compile-time surface
- * is the test. Free-text authored copy is not a value-shaped channel and is
- * covered above by the rendered-output scan.
+ * is the test. Free-text authored copy — `LedgerRow`'s and `EvidenceCard`'s — is
+ * not a value-shaped channel and is covered above by the rendered-output scan.
  */
 function typeLevelGuards(): readonly (() => React.JSX.Element)[] {
   return [
@@ -193,6 +257,18 @@ function typeLevelGuards(): readonly (() => React.JSX.Element)[] {
     () => <Seal status="MAYBE" />,
     // @ts-expect-error Rule.variant is the closed two-variant union
     () => <Rule variant="strong" />,
+    // @ts-expect-error HoldButton's fill duration is read from the token, not a prop
+    () => <HoldButton variant="enter" label="X" onComplete={() => {}} onCancel={() => {}} durationMs={800} />,
+    // @ts-expect-error HoldButton.variant is the closed two-variant union
+    () => <HoldButton variant="hold" label="X" onComplete={() => {}} onCancel={() => {}} />,
+    // @ts-expect-error TabBar.activeTab is the closed four-tab union
+    () => <TabBar activeTab="SETTINGS" onSelect={() => {}} />,
+    // @ts-expect-error FieldView.state is the closed four-word union
+    () => <FieldView state="LOUD" />,
+    // @ts-expect-error EvidenceCard.certainty is the closed band union, never a number
+    () => <EvidenceCard typeLabel="X" certainty={0.9} channel="c" possibleMatch="m" onResolve={() => {}} />,
+    // @ts-expect-error Sheet holds a surface, not a depth level
+    () => <Sheet depth={2}><Text>x</Text></Sheet>,
   ];
 }
 
@@ -200,6 +276,6 @@ describe('no escape hatch exists to add a measurement', () => {
   it('every forbidden prop shape is a compile error', () => {
     // The assertion is the `@ts-expect-error` lines above; this proves only that
     // the array built.
-    expect(typeLevelGuards()).toHaveLength(7);
+    expect(typeLevelGuards()).toHaveLength(13);
   });
 });
