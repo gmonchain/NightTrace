@@ -31,6 +31,13 @@ module.exports = {
       testPathIgnorePatterns: ['<rootDir>/src/engine/'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
+        // `yaml` publishes an ESM browser build (its `browser` field) and a CJS
+        // build under `dist/`. `transformIgnorePatterns` does not cover `yaml`,
+        // so a bare `import { parse } from 'yaml'` resolves to the browser
+        // build and fails to parse under Jest. This mapping is test-only: the
+        // app never imports `yaml` — `src/ui/theme/tokens.ts` is dependency-free
+        // — so the shipped bundle stays parser-free.
+        '^yaml$': '<rootDir>/node_modules/yaml/dist/index.js',
       },
     },
   ],

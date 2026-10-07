@@ -258,6 +258,122 @@ function importBan(group, message) {
   ];
 }
 
+// --- AD-17: raw values are banned under the Shell block ----------------------
+//
+// Components read tokens from `src/ui/theme/tokens.ts` and never hard-code a
+// raw value. The selectors are deliberately **neither anchored to a whole
+// string nor an unbounded substring**:
+//
+//   * An anchored `^…$` match lets every compound style string through —
+//     `'1px solid #0B140E'`, `'8px 12px'`, `'translateY(8px)'` — which is the
+//     commonest hard-code shape in a React Native component.
+//   * An unbounded substring match is worse: `'Case #123456'`, `'tag #abc123'`
+//     and `'ID #ABCDEF'` are six-digit case references and hashtags, and
+//     `'The 1950s were strange'` / `'made in the 70s'` are ordinary prose.
+//     Flagging those would force `eslint-disable`s into UI copy, which is how a
+//     gate gets switched off. (The three-digit `'Case #123'` / `'Room #4b2'` /
+//     `'tag #abc'` forms are excluded by the 6/8-digit rule below, not by this
+//     boundary; they are not what motivates it.)
+//
+// So every pattern carries a left boundary *and* a right boundary.
+//
+// The hex matcher requires its left boundary to be the **start of the literal or
+// a value delimiter** (`=`, `:`, `,`, `(`, `[`, `{`, `;`) optionally followed by
+// whitespace. That is what separates a hex *value* (`'#0B140E'`, `'(#0B140E)'`,
+// `'color: #0B140E'`) from a hex preceded by an ordinary word and a space — a
+// case reference or prose (`'Case #123456'`, `'tag #abc123'`, `'ID #ABCDEF'`).
+// Its right boundary rejects a trailing hex digit.
+//
+// The hex matcher is **6- and 8-digit only**; the 3-digit `#rgb` form is
+// deliberately excluded. A bare 3-digit literal (`'#123'`) is lexically
+// identical to this product's case references, which the boundary requires stay
+// clean, and `DESIGN.md` spells every colour as 6 or 8 digits — so 3-digit
+// colours are not a shape the design source produces and matching them buys only
+// false positives (AD-20: the design source settles the AC's wording).
+//
+// The `px`/`pt` and duration matchers keep a word-boundary left edge, because no
+// required clean string contains a measurement: that is what catches
+// `'0 0 10px #0B140E'` (whose `10px` is space-preceded) as well as the
+// literal-start and delimiter-led forms.
+//
+// The duration matcher's **`s` half is start-of-literal only**. A space-preceded
+// `s` duration is deliberately excluded, because it is lexically
+// indistinguishable from a decade — `'the 1950s'` and `'transform 5s'` are the
+// same shape — and the intent's own boundary requires `'1950s'`/`'70s'` stay
+// clean. So `'5s'` (standalone) is rejected, while `'animation: 5s'`,
+// `'breathe 5s'` and `'The 1950s were strange'` lint clean. The `ms` half keeps
+// the word boundary, so `'240ms'` (and `'240MS'`) is rejected wherever it
+// stands. Unit letters are matched case-insensitively (`'10PX'`, `'240MS'` are
+// the same values as their lowercase forms).
+//
+// Out of scope, as the intent enumerates it: unitless numeric dimensions
+// (`fontSize: 24`), `rgba()`/`hsl()` colour functions, `em`/`rem` lengths,
+// interpolated durations (`` `${240}ms` ``), and raw values in JSX text children
+// (the selectors target `Literal`/`TemplateElement`, so `<Text>The 1950s</Text>`
+// is not visible to them).
+//
+// Reach: the selectors ride in the shared Shell block, so they fire under
+// `src/services/**`, `src/features/**`, `src/ui/**` and `src/store/**` — wider
+// than the AC's `src/ui/**` wording, and deliberately so (a stricter gate harms
+// no consumer). They are re-permitted for `src/ui/theme/tokens.ts` alone and for
+// `__tests__` files under those four directories.
+
+const HEX_COLOUR = '(^|[=:,(\\[{;]\\s*)#[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?(?![0-9a-fA-F])';
+const PX_DIMENSION = '\\b\\d+(?:\\.\\d+)?(?:[pP][xX]|[pP][tT])\\b';
+const DURATION = '(?:\\b\\d+(?:\\.\\d+)?[mM][sS]\\b|^\\d+(?:\\.\\d+)?[sS]\\b)';
+
+const AD17_MESSAGE =
+  'AD-17: components read tokens from src/ui/theme/tokens.ts and never ' +
+  'hard-code a raw value. This file is under the Shell block (src/services/**, ' +
+  'src/features/**, src/ui/**, src/store/**), where a raw hex colour, a raw ' +
+  'px/pt dimension and a literal millisecond duration are banned. Substitute ' +
+  'colors.*, typography.*, spacing.*, rounded.*, motion.*, components.*, ' +
+  'filters.*, fontFamilies.* or theme.*. Only src/ui/theme/tokens.ts and ' +
+  '__tests__ files under those directories are exempt.';
+
+/** The three banned value shapes, each with the shape name its message names. */
+const AD17_PATTERNS = [
+  { name: 'hex colour', pattern: HEX_COLOUR },
+  { name: 'px/pt dimension', pattern: PX_DIMENSION },
+  { name: 'literal duration', pattern: DURATION },
+];
+
+/**
+ * Both halves of each family: a plain `Literal` and a template literal's
+ * `TemplateElement`. A rule with one half only is a rule a template-literal
+ * hard-code walks straight past.
+ */
+const AD17_SELECTORS = AD17_PATTERNS.flatMap(({ name, pattern }) => [
+  {
+    selector: `Literal[value=/${pattern}/]`,
+    message: `${AD17_MESSAGE} (${name})`,
+  },
+  {
+    selector: `TemplateElement[value.raw=/${pattern}/]`,
+    message: `${AD17_MESSAGE} (${name})`,
+  },
+]);
+
+/**
+ * The `__tests__` exemption, spelled out rather than globbed as a bare
+ * `src/<anything>` so it reaches only the four directories the Shell block
+ * governs. Flat-config is last-match-wins and this block *replaces*
+ * `no-restricted-syntax` for every path it matches, so a whole-tree glob would
+ * silently delete the engine block's `Math.random` selector (AD-1) for engine
+ * test files and re-impose the SQL ban on the repository test files (AD-12's
+ * allowlist). Enumerated here to make that reach unmistakable.
+ */
+const AD17_EXEMPT_FILES = [
+  'src/services/**/__tests__/**/*.{ts,tsx}',
+  'src/features/**/__tests__/**/*.{ts,tsx}',
+  'src/ui/**/__tests__/**/*.{ts,tsx}',
+  'src/store/**/__tests__/**/*.{ts,tsx}',
+];
+
+/** The token module alone — never the whole `src/ui/theme/**` directory. */
+const AD17_EXEMPT_TOKEN_FILE = ['src/ui/theme/tokens.ts'];
+
+
 module.exports = defineConfig([
   ...expoConfig,
 
@@ -364,22 +480,68 @@ module.exports = defineConfig([
   },
 
   // The Shell's remaining directories — Logger is the only module that logs
-  // (Consistency Conventions, AD-30).
+  // (Consistency Conventions, AD-30). AD-17's raw-value selectors ride in this
+  // block, so they fire under every one of these directories; the two blocks
+  // below re-permit them for the token module and for `__tests__` files.
   {
     files: ['src/services/**/*.{ts,tsx}', 'src/features/**/*.{ts,tsx}', 'src/ui/**/*.{ts,tsx}', 'src/store/**/*.{ts,tsx}'],
     rules: {
       'no-console': 'error',
-      'no-restricted-syntax': ['error', ...SQL_SELECTORS, CONSOLE_SYNTAX_SELECTOR],
+      'no-restricted-syntax': [
+        'error',
+        ...SQL_SELECTORS,
+        CONSOLE_SYNTAX_SELECTOR,
+        ...AD17_SELECTORS,
+      ],
+    },
+  },
+
+  // AD-17's re-permit is scoped to the token module alone — never the whole
+  // `src/ui/theme/**` directory — so a component placed beside `tokens.ts`
+  // cannot escape the ban. Because last-match-wins replaces the list wholesale,
+  // the SQL and console selectors are re-included here.
+  {
+    files: AD17_EXEMPT_TOKEN_FILE,
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...SQL_SELECTORS,
+        CONSOLE_SYNTAX_SELECTOR,
+      ],
+    },
+  },
+
+  // AD-17 targets shipped components; a `__tests__` file's job is to hold
+  // literal values as fixtures (the sync test carries `'#FFFFFF'` and `'900ms'`
+  // precisely to drive the drift path). Without this exemption the rule would
+  // forbid its own gate. The `files` globs reach only the four directories the
+  // Shell block governs, so the engine block's `Math.random` selector (AD-1) and
+  // the repository allowlist (AD-12) are untouched.
+  {
+    files: AD17_EXEMPT_FILES,
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...SQL_SELECTORS,
+        CONSOLE_SYNTAX_SELECTOR,
+      ],
     },
   },
 
   // Logger is the one file permitted to log; both console rules are lifted for
-  // it alone, and it keeps the SQL and clock rules every source file carries.
+  // it alone. It is still a Shell path, so its block must re-include
+  // `...AD17_SELECTORS` — declared last, it replaces the Shell block's list
+  // wholesale, and omitting them would let `src/services/Logger.ts` escape AD-17
+  // while every description claims the Shell block covers it.
   {
     files: CONSOLE_EXEMPT_FILES,
     rules: {
       'no-console': 'off',
-      'no-restricted-syntax': ['error', ...SQL_SELECTORS],
+      'no-restricted-syntax': [
+        'error',
+        ...SQL_SELECTORS,
+        ...AD17_SELECTORS,
+      ],
     },
   },
 ]);

@@ -67,7 +67,7 @@ Individually:
 
 ```sh
 npm run typecheck  # tsc --noEmit; strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes + noImplicitOverride
-npm run lint       # ESLint boundary rules (AD-1 four-layer table, AD-12 SQL & route containment, AD-30 console)
+npm run lint       # ESLint boundary rules (AD-1 four-layer table, AD-12 SQL & route containment, AD-17 raw values, AD-30 console)
 npm test           # both Jest projects: `engine` on the node preset, `ui` on jest-expo
 npm run bundle     # iOS export; fails on a route under src/app/** that cannot resolve
 ```
@@ -117,7 +117,7 @@ The Android `submit` lane composes `sign` (which runs `gradle`) before
 
 ## Verification status
 
-`npm run verify` is green (68 tests across 7 suites, 2 projects) and
+`npm run verify` is green (176 tests across 8 suites, 2 projects) and
 `npm run bundle` exits 0. On a machine with no physical device attached, the
 device-install acceptance criterion is substituted as follows (see the story's
 Implementation Notes): `npx expo export --platform ios` bundles, `npx expo
@@ -130,9 +130,32 @@ config.
 
 ## Gates
 
-`.github/workflows/ci.yml` is the enforcement locus and the only place gates are
-declared blocking (AD-30). It runs `npm run verify`. Gates belonging to later
-stories — the token-sync test (AD-17), the claims lint (AD-16), content
-validation and aliases (AD-9, AD-18), migration idempotency (AD-22) and the
-golden-seed replay (AD-3) — are appended to that file by the story that builds
-them.
+`.github/workflows/ci.yml` runs `npm run verify`, and that entrypoint is where
+the gates run: the token-sync test (AD-17) is a `ui`-project Jest suite, so
+`npm test` runs it, and the AD-17 raw-value lint is defined in `eslint.config.js`
+and run by `npm run lint`. Gates belonging to later stories — the claims lint
+(AD-16), content validation and aliases (AD-9, AD-18), migration idempotency
+(AD-22) and the golden-seed replay (AD-3) — are appended to `ci.yml` by the story
+that builds them.
+
+**The AD-17 raw-value lint.** A component reads tokens from
+`src/ui/theme/tokens.ts` and never hard-codes a raw value. The rule fires on a
+raw hex colour (6- or 8-digit; the 3-digit `#rgb` form is excluded because
+`DESIGN.md` never writes one and it collides with case references), a raw `px`/`pt`
+dimension, and a literal millisecond duration — *including* a value embedded in a
+compound string (`'1px solid #0B140E'`, `'8px 12px'`, `'translateY(8px)'`). A hex
+counts when it stands at the start of a literal or after a value delimiter (`=`,
+`:`, `,`, `(`, `[`, `{`, `;`); a hex preceded only by an ordinary word and a space
+is left alone, so a hex-only compound with no `px`/`pt` beside it (`'0 0 0 #0B140E'`)
+is not caught — the compound forms above are caught by their dimension. A
+second-form second duration (`'5s'` at the start of a literal) is rejected, but a
+**space-preceded** second (`'animation: 5s'`, `'breathe 5s'`) is deliberately
+clean, because it is lexically indistinguishable from a decade (`'the 1950s'`).
+The rule rides in the shared Shell block, so it reaches `src/services/**`
+(including `src/services/Logger.ts`), `src/features/**`, `src/store/**` and
+`src/ui/**` — and exempts `__tests__` files under those four directories plus the
+token module `src/ui/theme/tokens.ts`.
+
+Two release items a lint cannot check — the colour-alone rule (AD-28/UX-DR25) and
+the two open questions on the 9.5px floor and the `safelight` hue — are recorded
+in `docs/review-items.md`, which a release reader should work through.

@@ -6,7 +6,6 @@ name: CI
 # described as CI-blocking until this pipeline runs it, so gates belonging to
 # later stories are appended here by the story that builds them:
 #
-#   - token sync (AD-17)                 — Story 1.2
 #   - claims lint (AD-16)                — Story 1.5
 #   - content validation + aliases (AD-9, AD-18) — Story 3.1 (emission bank,
 #     glyph set); the Alien-voice half lands in Story 5.6
@@ -15,6 +14,12 @@ name: CI
 #
 # No placeholder gate is declared here: an unimplemented gate that passes reads
 # as coverage, which is worse than an absent one.
+#
+# Story 1.2's gates are *not* on that list because `npm run verify` already runs
+# both of them: the token-sync test (AD-17) is a Jest suite under the `ui`
+# project, so `npm test` runs it, and the AD-17 raw-value lint is a rule defined
+# in `eslint.config.js` that `npm run lint` runs — `src/__tests__/boundary.test.ts`
+# only *tests* that the rule fires, it is not where the rule runs.
 
 on:
   push:

@@ -259,6 +259,253 @@ describe('console containment', () => {
 });
 
 /**
+ * AD-17's raw-value ban. The rule rides in the shared Shell block, so it fires
+ * under `src/services/**`, `src/features/**`, `src/ui/**` and `src/store/**` —
+ * wider than the acceptance criterion's `src/ui/**` wording — and is re-permitted
+ * for `src/ui/theme/tokens.ts` alone plus `__tests__` files under those four
+ * directories.
+ *
+ * Two failure modes are pinned here at once. A rule with no *rejecting* case is
+ * one CI cannot see removed; a rule with no *clean* case is one whose over-reach
+ * is invisible. So every family is exercised in both the plain-`Literal` half and
+ * the `TemplateElement` half (delete either selector and a case fails), the
+ * compound and alpha-hex forms the AC's own boundary names are caught, and the
+ * ordinary-copy strings the boundary must not touch are asserted clean.
+ */
+const AD17 = 'AD-17';
+
+/** Every `no-restricted-syntax` message, whatever AD it names. */
+function syntaxMessages(messages: readonly LintMessage[]): readonly LintMessage[] {
+  return messages.filter((message) => message.ruleId === 'no-restricted-syntax');
+}
+
+/**
+ * Only the AD-17 messages. Note this filter alone would let a "clean" fixture
+ * that also raised a console or SQL error read as clean, so the clean cases
+ * below assert `syntaxMessages` is empty rather than only this slice.
+ */
+function ad17Messages(messages: readonly LintMessage[]): readonly LintMessage[] {
+  return syntaxMessages(messages).filter((message) =>
+    message.message.includes(AD17),
+  );
+}
+
+describe('raw-value lint (AD-17) rejects raw values under the Shell block', () => {
+  const REJECTED: readonly (readonly [string, string])[] = [
+    // The three families the acceptance criterion names, in the bare form.
+    ["export const x = '#0B140E';", 'bare hex'],
+    ["export const x = '10px';", 'bare px dimension'],
+    ["export const x = '240ms';", 'bare millisecond duration'],
+    // The commonest hard-code shape: a value inside a compound style string.
+    ["export const x = '1px solid #0B140E';", 'compound border'],
+    ["export const x = '8px 12px';", 'compound padding'],
+    ["export const x = 'translateY(8px)';", 'transformed dimension'],
+    ["export const x = '0 0 10px #0B140E';", 'compound shadow'],
+    // An 8-digit alpha hex is still a hex colour.
+    ["export const x = '#0B140EAA';", '8-digit alpha hex'],
+    // A hex glued to its delimiter (no space after the colon).
+    ["export const x = 'color:#0B140E';", 'hex glued to delimiter'],
+    // Unit letters are case-insensitive.
+    ["export const x = '10PX';", 'uppercase PX'],
+    ["export const x = '240MS';", 'uppercase MS'],
+    // `pt` is a dimension too.
+    ["export const x = '12pt';", 'pt dimension'],
+    // The product's own motion spelling at the start of a literal.
+    ["export const x = '5s';", 'bare second duration'],
+    // The string-start decade the matcher's `s` branch actually flags — pinned
+    // so the boundary's real shape is recorded rather than assumed.
+    ["export const x = '70s';", 'string-start decade'],
+    ["export const x = ['70s', '80s'];", 'array of decades'],
+  ];
+
+  it.each(REJECTED)(
+    'rejects %s (%s) naming AD-17 with a severity-2 error',
+    (literal) => {
+      const messages = ad17Messages(
+        lintText(`${literal}\n`, 'src/ui/components/Foo.tsx'),
+      );
+      expect(messages.length).toBeGreaterThanOrEqual(1);
+      expect(messages[0]?.severity).toBe(2);
+    },
+  );
+
+  /**
+   * The `TemplateElement` half of every family. Each family emits a `Literal`
+   * selector and a `TemplateElement[value.raw=…]` selector, so a rejecting case
+   * written as a plain string covers only the first; deleting the second leaves
+   * the suite green unless a template literal is exercised.
+   */
+  const REJECTED_TEMPLATES: readonly (readonly [string, string])[] = [
+    ['export const x = `#0B140E`;', 'template bare hex'],
+    ['export const x = `10px`;', 'template bare px'],
+    ['export const x = `240ms`;', 'template duration'],
+    ['export const x = `1px solid #0B140E`;', 'template compound border'],
+    ['export const x = `8px 12px`;', 'template compound padding'],
+    ['export const x = `translateY(8px)`;', 'template transformed dimension'],
+    ['export const x = `#0B140EAA`;', 'template alpha hex'],
+    ['export const x = `5s`;', 'template second duration'],
+  ];
+
+  it.each(REJECTED_TEMPLATES)(
+    'rejects the template-literal form %s (%s)',
+    (literal) => {
+      const messages = ad17Messages(
+        lintText(`${literal}\n`, 'src/ui/components/Foo.tsx'),
+      );
+      expect(messages.length).toBeGreaterThanOrEqual(1);
+      expect(messages[0]?.message).toContain(AD17);
+    },
+  );
+
+  /**
+   * The false-positive boundary. Each of these is ordinary screen copy —
+   * case references, hashtags, prose timings — whose shape collides with the
+   * value shapes above. `syntaxMessages` (not `ad17Messages`) is asserted empty,
+   * so a collateral console or SQL error in the same fixture cannot hide behind
+   * the AD-17 filter and read as clean.
+   */
+  const CLEAN: readonly (readonly [string, string])[] = [
+    ["export const x = 'Case #123';", 'case reference'],
+    ["export const x = 'Room #4b2';", 'room reference'],
+    ["export const x = 'tag #abc123';", 'hashtag'],
+    ["export const x = 'ID #ABCDEF';", 'id reference'],
+    ["export const x = 'The 1950s were strange';", 'space-preceded decade'],
+    ["export const x = 'made in the 70s';", 'space-preceded decade 2'],
+    // The seconds branch is start-of-literal only: a space-preceded `s` is
+    // deliberately not a duration, because `'transform 5s'` and `'the 1950s'`
+    // are the same shape.
+    ["export const x = 'animation: 5s';", 'space-preceded seconds'],
+    ["export const x = 'breathe 5s';", 'motion sentence'],
+    // The 3-digit `#rgb` form the matcher deliberately excludes, pinned clean
+    // so a future matcher that starts matching 3-digit colours has a case to
+    // break.
+    ["export const x = '#123';", 'bare 3-digit hex'],
+    ['export const x = `#123`;', 'template 3-digit hex'],
+    // Value shapes the acceptance criterion keeps out of scope, pinned clean in
+    // both selector halves so a tightening that starts flagging them fails here.
+    ["export const x = '0.42em';", 'em length'],
+    ["export const x = 'rgba(0,0,0,0.5)';", 'rgba colour'],
+    ['export const x = `the 1950s`;', 'template prose timing'],
+    ['export const x = `animation: 5s`;', 'template space-preceded seconds'],
+  ];
+
+  it.each(CLEAN)('permits the ordinary copy %s (%s)', (literal) => {
+    const messages = lintText(`${literal}\n`, 'src/ui/components/Foo.tsx');
+    expect(syntaxMessages(messages)).toHaveLength(0);
+  });
+
+  it('permits a component that reads its values from the token module', () => {
+    const component = [
+      "import { colors, rounded, spacing } from '../theme/tokens';",
+      'export const card = {',
+      '  backgroundColor: colors.ledger,',
+      '  borderColor: colors.rule,',
+      '  padding: spacing[4],',
+      '  borderRadius: rounded.DEFAULT,',
+      '};',
+      '',
+    ].join('\n');
+    const messages = lintText(component, 'src/ui/components/Card.tsx');
+    expect(syntaxMessages(messages)).toHaveLength(0);
+  });
+
+  it('permits raw values inside the token module itself', () => {
+    const messages = lintText(
+      "export const night = '#0B140E';\nexport const gap = '10px';\nexport const ms = '240ms';\n",
+      'src/ui/theme/tokens.ts',
+    );
+    expect(ad17Messages(messages)).toHaveLength(0);
+  });
+
+  it('does not extend the re-permit to a component beside the token module', () => {
+    // The re-permit is scoped to `tokens.ts`, never the whole `src/ui/theme/**`
+    // directory, so a file placed beside it still carries the ban.
+    const messages = ad17Messages(
+      lintText("export const night = '#0B140E';\n", 'src/ui/theme/Swatch.tsx'),
+    );
+    expect(messages).toHaveLength(1);
+    expect(messages[0]?.severity).toBe(2);
+  });
+
+  it('message names the directories it governs', () => {
+    const messages = ad17Messages(
+      lintText("export const x = '#0B140E';\n", 'src/ui/components/Foo.tsx'),
+    );
+    expect(messages[0]?.message).toContain('src/services');
+    expect(messages[0]?.message).toContain('src/features');
+    expect(messages[0]?.message).toContain('src/ui');
+    expect(messages[0]?.message).toContain('src/store');
+  });
+});
+
+describe('the AD-17 reach covers every Shell directory it claims', () => {
+  const REACH: readonly (readonly [string, string])[] = [
+    ['src/services/Other.ts', 'services'],
+    ['src/features/session.ts', 'features'],
+    ['src/ui/components/Foo.tsx', 'ui'],
+    ['src/store/cases.ts', 'store'],
+    // Logger is a Shell path too: its own block re-declares the rule list, so
+    // omitting `...AD17_SELECTORS` there would let this one file escape.
+    ['src/services/Logger.ts', 'Logger'],
+  ];
+
+  it.each(REACH)('rejects a raw hex at %s (%s)', (filename) => {
+    const messages = ad17Messages(
+      lintText("export const x = '#0B140E';\n", filename),
+    );
+    expect(messages).toHaveLength(1);
+    expect(messages[0]?.severity).toBe(2);
+  });
+
+  it('leaves the two Logger statements agreeing', () => {
+    const logger = ad17Messages(
+      lintText("export const x = '#0B140E';\n", 'src/services/Logger.ts'),
+    );
+    const other = ad17Messages(
+      lintText("export const x = '#0B140E';\n", 'src/services/Other.ts'),
+    );
+    expect(logger).toHaveLength(other.length);
+  });
+});
+
+describe('the AD-17 test exemption stays scoped to the Shell directories', () => {
+  it.each([
+    ['src/services/__tests__/x.ts', 'services'],
+    ['src/features/__tests__/x.ts', 'features'],
+    ['src/ui/__tests__/x.ts', 'ui'],
+    ['src/store/__tests__/x.ts', 'store'],
+    ['src/ui/theme/__tests__/x.ts', 'theme'],
+  ])('permits literals in %s (%s)', (filename) => {
+    const messages = ad17Messages(
+      lintText("export const fixture = '#0B140E';\n", filename),
+    );
+    expect(messages).toHaveLength(0);
+  });
+
+  /**
+   * The two cross-layer regressions a whole-tree `__tests__` glob would cause.
+   * The exemption block replaces `no-restricted-syntax` for every path it
+   * matches, so if it spanned the tree it would delete the engine block's
+   * `Math.random` selector (AD-1) and re-impose the SQL ban on the repository
+   * allowlist (AD-12). These are the tripwires against that.
+   */
+  it('keeps AD-1’s Math.random ban alive in an engine test file', () => {
+    const messages = syntaxMessages(
+      lintText('export const draw = Math.random();\n', 'src/engine/__tests__/x.ts'),
+    );
+    const ad1 = messages.filter((message) => message.message.includes('AD-1'));
+    expect(ad1).toHaveLength(1);
+  });
+
+  it('keeps a SQL literal clean in a repository test file', () => {
+    const messages = syntaxMessages(
+      lintText(`export const query = '${SQL}';\n`, 'src/db/repositories/__tests__/x.ts'),
+    );
+    expect(messages).toHaveLength(0);
+  });
+});
+
+/**
  * AD-12's route containment, every alias/relative combination for both layers.
  * The fixtures prove the rule fires; these prove the four specifiers the
  * acceptance criterion names are each matched, so an over-narrow glob cannot
