@@ -1,3 +1,12 @@
+// React 19 exports `act` **only** from its development build, and
+// @testing-library/react-native v14 renders through it. Expo tooling exports
+// `NODE_ENV=production`, which makes `require('react')` resolve
+// `react.production.js` — so every `render()` throws
+// `actImplementation is not a function` while typecheck and lint stay green.
+// Forcing it in the config (rather than in the `npm test` script) keeps a bare
+// `npx jest` correct in every shell and introduces no POSIX-only syntax.
+process.env.NODE_ENV = 'test';
+
 /**
  * Two Jest projects (ARCHITECTURE-SPINE.md, Testing convention).
  *

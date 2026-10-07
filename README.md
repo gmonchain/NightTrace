@@ -117,7 +117,7 @@ The Android `submit` lane composes `sign` (which runs `gradle`) before
 
 ## Verification status
 
-`npm run verify` is green (176 tests across 8 suites, 2 projects) and
+`npm run verify` is green (249 tests across 18 suites, 2 projects) and
 `npm run bundle` exits 0. On a machine with no physical device attached, the
 device-install acceptance criterion is substituted as follows (see the story's
 Implementation Notes): `npx expo export --platform ios` bundles, `npx expo
