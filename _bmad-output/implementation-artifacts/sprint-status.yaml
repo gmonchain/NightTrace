@@ -40,7 +40,7 @@ development_status:
   1-2-the-design-tokens-exist-and-a-test-proves-they-match-the-des: done
   1-3-the-document-components-render-the-product-s-typographic-lan: done
   1-4-the-interaction-components-gate-gestures-and-never-indicate: done
-  1-5-the-build-refuses-to-ship-a-sentence-that-asserts-anything-a: backlog
+  1-5-the-build-refuses-to-ship-a-sentence-that-asserts-anything-a: done
   1-6-a-first-time-user-learns-the-frame-before-their-first-sessio: backlog
   1-7-the-notice-stays-reachable-and-travels-with-the-user-s-data: backlog
   1-8-the-four-tab-shell-exists-and-holds-exactly-four-tabs: backlog
