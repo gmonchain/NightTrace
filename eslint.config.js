@@ -373,6 +373,46 @@ const AD17_EXEMPT_FILES = [
 /** The token module alone — never the whole `src/ui/theme/**` directory. */
 const AD17_EXEMPT_TOKEN_FILE = ['src/ui/theme/tokens.ts'];
 
+// --- Story 1.6: the onboarding path requests no permission, reads no sensor --
+//
+// The epic's zero-permission playability constraint promises every onboarding
+// screen renders with nothing granted and requests nothing before it is needed,
+// so the one way a screen could break that is by importing a sensor,
+// permission, audio, camera or notification module. These two blocks ban exactly
+// those modules on the onboarding feature files and routes.
+//
+// Each block declares only `no-restricted-imports`, so it replaces no
+// `no-restricted-syntax` list: the Shell block's SQL / console / AD-17 selectors
+// (for `src/features/onboarding/**`) and the route block's SQL / console
+// selectors (for `src/app/(onboarding)/**`) both stay in force.
+const ONBOARDING_FEATURE = ['src/features/onboarding/**/*.{ts,tsx}'];
+const ONBOARDING_ROUTES = ['src/app/(onboarding)/**/*.{ts,tsx}'];
+
+const ONBOARDING_MODULE_BAN = [
+  'expo-sensors',
+  'expo-sensors/*',
+  'expo-sensors/**',
+  'expo-location',
+  'expo-location/*',
+  'expo-location/**',
+  'expo-camera',
+  'expo-camera/*',
+  'expo-camera/**',
+  'expo-av',
+  'expo-av/*',
+  'expo-av/**',
+  'expo-audio',
+  'expo-audio/*',
+  'expo-audio/**',
+  'expo-notifications',
+  'expo-notifications/*',
+  'expo-notifications/**',
+];
+
+const ONBOARDING_NO_PERMISSION_MESSAGE =
+  'Story 1.6: the onboarding path requests no permission and reads no sensor. ' +
+  'A screen on this path may not import expo-sensors, expo-location, ' +
+  'expo-camera, expo-av, expo-audio or expo-notifications.';
 
 module.exports = defineConfig([
   ...expoConfig,
@@ -541,6 +581,43 @@ module.exports = defineConfig([
         'error',
         ...SQL_SELECTORS,
         ...AD17_SELECTORS,
+      ],
+    },
+  },
+
+  // Story 1.6: the onboarding feature files gain only the sensor/permission
+  // import ban. They carried no `no-restricted-imports` before, so this replaces
+  // nothing, and their SQL / console / AD-17 syntax selectors are untouched.
+  {
+    files: ONBOARDING_FEATURE,
+    rules: {
+      'no-restricted-imports': importBan(
+        ONBOARDING_MODULE_BAN,
+        ONBOARDING_NO_PERMISSION_MESSAGE,
+      ),
+    },
+  },
+
+  // The onboarding routes: declaring `no-restricted-imports` here replaces the
+  // route block's AD-12 ban (same rule id) for these files, so its engine/db
+  // patterns are re-included alongside the sensor ban — last-match-wins.
+  {
+    files: ONBOARDING_ROUTES,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ONBOARDING_MODULE_BAN,
+              message: ONBOARDING_NO_PERMISSION_MESSAGE,
+            },
+            {
+              group: ['@/engine/**', '**/engine/**', '@/db/**', '**/db/**'],
+              message: AD12_IMPORT_MESSAGE,
+            },
+          ],
+        },
       ],
     },
   },

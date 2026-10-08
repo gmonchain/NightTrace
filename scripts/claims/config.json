@@ -47,7 +47,7 @@
   "allowedPhrases": [
     {
       "phrase": "Nothing here is proof.",
-      "ruling": "addendum §B.4 row 27 (Camera tool copy) — the one ratified safe form that still contains a banned token"
+      "ruling": "addendum §B.4 row 27 — the one ratified safe form that still contains a banned token; it ships as the Camera tool copy and as the onboarding notice headline"
     }
   ],
   "bannedCharacters": ["%"],
@@ -82,6 +82,11 @@
     {
       "key": "ui.string-table-barrel",
       "path": "src/data/strings/index.ts",
+      "kind": "ui-string-table"
+    },
+    {
+      "key": "ui.onboarding-copy",
+      "path": "src/data/strings/onboarding.ts",
       "kind": "ui-string-table"
     },
     {

@@ -55,6 +55,29 @@ describe('kv', () => {
     expect(typeof call).toBe('function');
   });
 
+  it('round-trips the numeric onboardingStep key', async () => {
+    const kv = createKv(fakeStorage());
+    const written = await kv.set('onboardingStep', 2);
+    expect(written.ok).toBe(true);
+
+    const value = await kv.get('onboardingStep');
+    // The annotation is the compile-time half of the row: a mistyped key or a
+    // wrong value type fails `tsc`, not this assertion.
+    const typed: number | null = value;
+    expect(typed).toBe(2);
+  });
+
+  it('resolves a wrongly-typed onboardingStep to null with a value-free line', async () => {
+    // A boolean stored under the number key does not match the declared type.
+    const kv = createKv(fakeStorage({ onboardingStep: 'true' }));
+    const value = await kv.get('onboardingStep');
+
+    expect(value).toBeNull();
+    expect(records).toHaveLength(1);
+    expect(records[0]?.code).toBe('kv.parse_failed');
+    expect(records[0]?.fields).toEqual({});
+  });
+
   it('returns null — never undefined — for a key that was never written', async () => {
     const kv = createKv(fakeStorage());
     const value = await kv.get('noticeAcknowledged');

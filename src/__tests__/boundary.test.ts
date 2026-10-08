@@ -129,6 +129,13 @@ const FIXTURE_EXPECTATIONS: readonly Expectation[] = [
     ruleId: 'no-restricted-imports',
     ad: 'AD-1',
   },
+  {
+    // Story 1.6's zero-permission / zero-sensor claim: an onboarding screen may
+    // not import a sensor or permission module, or the path would prompt.
+    file: 'src/features/onboarding/__boundary_fixtures__/import-expo-location.ts',
+    ruleId: 'no-restricted-imports',
+    ad: 'Story 1.6',
+  },
 ];
 
 describe('boundary fixtures are rejected by ESLint', () => {

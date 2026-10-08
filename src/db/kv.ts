@@ -28,6 +28,9 @@ type KvKind = 'boolean' | 'number' | 'string';
 /** The closed settings-key registry. Adding a setting adds an entry here. */
 export const KV_SCHEMA = {
   noticeAcknowledged: 'boolean',
+  // Story 1.6: the onboarding position, device-local. The number of screens the
+  // user has completed (0..4); a relaunch resumes from it instead of restarting.
+  onboardingStep: 'number',
 } as const satisfies Record<string, KvKind>;
 
 export type KvKey = keyof typeof KV_SCHEMA;
