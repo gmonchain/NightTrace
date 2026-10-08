@@ -1,15 +1,16 @@
 # Release review items
 
-**Last worked through:** 2026-10-07, with Story 1.2 (design tokens). Read this
+**Last worked through:** 2026-10-08, with Story 1.5 (the claims lint). Read this
 file on every release; none of these items gates a build step, so nothing else
 will surface them.
 
 These are the release items a lint structurally cannot check — AD-17's
-colour-alone rule (AD-28/UX-DR25), the typographic floor's open question, and
-the `safelight` hue's open question. They are read on release, and the README's
-Gates section is what makes them reachable: this file is not referenced by
-anything that executes, so it is the README paragraph a release reader follows,
-not a CI comment.
+colour-alone rule (AD-28/UX-DR25), the typographic floor's open question, the
+`safelight` hue's open question, and — added by Story 1.5 — AD-16's five
+string-blind review items and NFR-20's store-metadata review. They are read on
+release, and the README's Gates section is what makes them reachable: this file
+is not referenced by anything that executes, so it is the README paragraph a
+release reader follows, not a CI comment.
 
 > **Owner status: open — no named person.** AD-30 requires a release item of
 > this class be *"owned by a named person, not an intention."* No personal name
@@ -19,9 +20,12 @@ not a CI comment.
 > and the requirement is recorded as **unmet**, not as though a person had
 > accepted it. Closing this needs a human to put a name against each item.
 
-This file does **not** claim AD-16's five blind spots (images, mechanics,
-juxtaposition, visual hierarchy, and the sum of individually-safe sentences).
-Those are a different release item, owned elsewhere.
+This file now also carries AD-16's five blind spots (images, mechanics,
+juxtaposition, visual hierarchy, and the sum of individually-safe sentences),
+NFR-20's store-metadata review, and the `%`-scope exclusion (RE-3). Story 1.5
+added them as owned release items: its claims lint parses strings and nothing
+else, so a passing build is evidence about strings and nothing else. The lint
+does **not** automate any item below.
 
 ---
 
@@ -118,3 +122,81 @@ rationale that contradicts its own token is worse than none.
 
 **Review at release:** resolve the hue, then update `DESIGN.md`'s frontmatter
 and rationale together. The sync test fails until `tokens.ts` follows.
+
+---
+
+## RE-1 — The five AD-16 blind spots
+
+**Owner:** unassigned (see the owner status above)
+**Governing:** ARCHITECTURE-SPINE.md AD-16, AD-30; epics Story 1.5; SM-8.
+**Status:** open — a human sentence-level review on every release.
+
+The claims lint (`npm run claims:check`) parses **strings and nothing else**. A
+sentence can misdescribe what the app actually did without containing a banned
+term, and the lint cannot see any of the five classes below. These are not
+lint rules; they are read by a person on every release (SM-8's second count).
+**Story 1.5 does not claim to have automated any of them.**
+
+- **Images.** A screenshot, a capture card or a share card whose pixels imply a
+  reading the strings deny — a curve that looks like a chart, a glow that looks
+  like a confirmed contact.
+- **Mechanics.** What the app actually *does*, as opposed to what it says — a
+  fake scan loop, an animation that implies a sensor is working.
+- **Juxtaposition.** Two individually-clean sentences or labels placed together
+  so the pair asserts what neither does alone.
+- **Visual hierarchy.** Emphasis that turns a qualifier into the point — the
+  band word set large while `inferred` sits small.
+- **The sum of individually-safe sentences.** A screen whose every sentence is
+  clean but whose whole reads as a claim.
+
+**Review at release:** walk every shipped screen, screenshot and share surface
+as a whole and ask what a stranger would believe the app just did; confirm the
+answer is "it wrote a case file", never "it detected, proved or measured
+something".
+
+---
+
+## RE-2 — NFR-20: store-metadata review against App Store 2.3.1 / 2.3.7
+
+**Owner:** unassigned (see the owner status above)
+**Governing:** epics NFR-18, NFR-20; ARCHITECTURE-SPINE.md AD-16; App Store
+Review Guidelines 1.1.6, 2.3.1(a), 2.3.7.
+**Status:** open — a submission-time review, not a build gate.
+
+The claims lint checks the store title, subtitle, description and screenshot
+captions against the banned-term list and the `%` ban. It does **not** check
+them against the App Store's own metadata rules: **2.3.1(a)** barring
+unverifiable claims and **2.3.7** barring misleading metadata. Guideline 1.1.6
+is explicit that calling an app "for entertainment purposes" does not by itself
+excuse false information, so the product is defended by its design, not its
+disclaimer. `assets/store/listing.json` is the surface to read; the rating
+(`12+/Teen`) is derived from the recorded questionnaire inputs, and its inputs
+and derivation live in that file.
+
+**Review at release:** before submission, read `assets/store/listing.json`
+against 2.3.1/2.3.7 — not only against the banned-term list — and confirm the
+description, title, subtitle and every screenshot caption claim nothing a
+reviewer could check and falsify.
+
+---
+
+## RE-3 — The `%` scope excludes `src/ui/theme/**`
+
+**Owner:** unassigned (see the owner status above)
+**Governing:** ARCHITECTURE-SPINE.md AD-16; epics FR-33; `scripts/claims/config.json` `shippedCharacterScope`.
+**Status:** open — a scope narrowing a human must re-confirm at release.
+
+FR-33 bans `%` "anywhere — no carve-out on any surface". The claims lint enforces
+the `%` ban over the declared surface set and, to widen it, over
+`shippedCharacterScope` — the shipped source the surface set does not enumerate.
+That scope deliberately **omits `src/ui/theme/**`**: the one `%` there is the
+Seal's SVG filter-region extent (`'-10%'`, `'120%'` in
+`src/ui/theme/tokens.ts`), a style value rather than copy, and Story 1.4's
+`no-measurement` suite pins it as the only `%`-bearing surface. So the ban is not
+literally universal: a new `%` added under `src/ui/theme/**` would not fail the
+build.
+
+**Review at release:** confirm `src/ui/theme/**` still carries no `%` beyond the
+Seal's SVG filter-region value and authors no copy; if either changes, add the
+offending file to the declared surface set (or its root to
+`shippedCharacterScope`) rather than relying on the exclusion.

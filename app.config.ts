@@ -56,9 +56,35 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       bundleIdentifier: `${BUNDLE_BASE}${idSuffix}`,
       deploymentTarget: '16.4',
       supportsTablet: false,
+      // The highest-risk shipped strings AD-16 names: an iOS purpose string
+      // sits beside the field reading it explains, so each is part of the claims
+      // lint's declared surface set. Declaring a purpose string is not requesting
+      // a permission — the OS prompts only when the tool that needs the sensor is
+      // opened, so zero-permission playability is untouched. The set covers every
+      // sensor the About notice's SENSORS USED inventory names (Microphone,
+      // Motion, Camera, Location), so the notice never overstates the binary.
+      infoPlist: {
+        NSMotionUsageDescription:
+          'Motion is used only while a session is open, to let the field respond to how you move. It never leaves this device.',
+        NSMicrophoneUsageDescription:
+          'The microphone is used only while you record audio within a session. Recordings stay on this device.',
+        NSCameraUsageDescription:
+          'The camera is used only while you capture a frame within a session. Images stay on this device.',
+        NSLocationWhenInUseUsageDescription:
+          'Location is used only while a session is open, to place your night on the map of your place. It never leaves this device.',
+      },
     },
     android: {
       package: `${BUNDLE_BASE}${idSuffix}`,
+      // The Android manifest analogues of those purpose strings. A declared
+      // permission is not a requested one: nothing is asked for until the tool
+      // that needs it is opened.
+      permissions: [
+        'android.permission.RECORD_AUDIO',
+        'android.permission.ACTIVITY_RECOGNITION',
+        'android.permission.CAMERA',
+        'android.permission.ACCESS_FINE_LOCATION',
+      ],
     },
     experiments: {
       typedRoutes: true,

@@ -6,16 +6,14 @@ name: CI
 # described as CI-blocking until this pipeline runs it, so gates belonging to
 # later stories are appended here by the story that builds them:
 #
-#   - claims lint (AD-16)                — Story 1.5
 #   - content validation + aliases (AD-9, AD-18) — Story 3.1 (emission bank,
 #     glyph set); the Alien-voice half lands in Story 5.6
 #   - migration idempotency (AD-22)      — Story 2.5
 #   - golden-seed replay (AD-3)          — Story 2.2
 #
-# Story 1.4's grain-reproducibility gate (`npm run grain:check`) is appended
-# below: the committed tile must regenerate byte-for-byte from
-# `scripts/generate-grain.mjs`, so the asset cannot drift from its authoring
-# script.
+# Two gates are already appended below, by the stories that built them:
+# Story 1.4's grain-reproducibility gate (`npm run grain:check`) and Story
+# 1.5's claims lint (`npm run claims:check`, AD-16 / NFR-18).
 #
 # No placeholder gate is declared here: an unimplemented gate that passes reads
 # as coverage, which is worse than an absent one.
@@ -64,6 +62,13 @@ jobs:
       # part of `lint` and again, per fixture, in the boundary test.
       - name: Verify
         run: npm run verify
+
+      # The claims lint (AD-16 / NFR-18): no shipped sentence may assert anything
+      # about the real world. `verify` runs the suite that *tests* the gate;
+      # this step is where the gate actually runs over the declared
+      # string-surface set, so a banned term or a `%` fails the build.
+      - name: Claims lint (no real-world assertion)
+        run: npm run claims:check
 
       # The grain tile's byte-for-byte reproducibility gate. `verify` cannot see
       # a drifted `assets/grain.png`, so this step is what makes the drift

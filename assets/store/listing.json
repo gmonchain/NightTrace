@@ -1,0 +1,32 @@
+{
+  "title": "NightTrace",
+  "subtitle": "Paranormal field journal",
+  "category": "Entertainment",
+  "description": "An investigation experience. Not a measurement. NightTrace is a paranormal field journal: investigate a place on the record, work it with instrument-like tools, and keep the night as a case file. Choose a hunt such as a ghost hunt, a cryptid outing, or a night outdoors, and the tools turn what your device senses into material for a case. Record signals you cannot place, mark what you ruled out, and seal the night as a report that reads like a field journal. Everything is generated locally and procedurally, on your device, with no account and no connections. Investigate your own place, on the record.",
+  "ratingInputs": {
+    "framework": "IARC content-rating questionnaire (App Store and Google Play aligned)",
+    "answers": {
+      "violence": "none",
+      "bloodAndGore": "none",
+      "sexualContent": "none",
+      "nudity": "none",
+      "profanity": "none",
+      "alcoholTobaccoOrDrugs": "none",
+      "gambling": "none",
+      "horrorOrFearThemes": "frequent",
+      "suddenOrLoudAudio": "frequent",
+      "flashingOrStrobingVisuals": "frequent",
+      "matureOrSuggestiveThemes": "none",
+      "userGeneratedContent": "none",
+      "unrestrictedWebAccess": "none"
+    }
+  },
+  "rating": "12+/Teen",
+  "screenshots": [
+    { "id": "screenshot-1", "caption": "Pick your night." },
+    { "id": "screenshot-2", "caption": "Work the place with instrument-like tools." },
+    { "id": "screenshot-3", "caption": "Record signals you cannot place." },
+    { "id": "screenshot-4", "caption": "Seal the night as a case file." },
+    { "id": "screenshot-5", "caption": "A field journal that writes itself." }
+  ]
+}

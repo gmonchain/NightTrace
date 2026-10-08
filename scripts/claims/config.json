@@ -1,0 +1,130 @@
+{
+  "$comment": "The claims-boundary declaration (ARCHITECTURE-SPINE.md AD-16). This file is NOT a shipped surface: it contains the banned terms, so scanning it would flag itself. `bannedTerms` is the ratified closed list in addendum §B.2 minus the `%` character, which is `bannedCharacters`, plus the inflections FR-33's classes name that whole-word matching would otherwise miss. `bannedPatterns` holds the FR-33 prohibitions that are not single words — a statistic/digit, social proof or an award, and fake telemetry or progress-scanning language — as regex sources. `allowedPhrases` holds only the safe forms the §B.4 rulings table ratifies that still contain a banned token. `shippedCharacterScope` is the shipped source the `%` ban also covers, minus the style-value modules and test files the `%` docs comment on.",
+  "bannedTerms": [
+    "detect",
+    "prove",
+    "proof",
+    "confirm",
+    "verify",
+    "authentic",
+    "real ghost",
+    "scientific",
+    "science",
+    "thermal",
+    "radiation",
+    "Geiger",
+    "accuracy",
+    "algorithm",
+    "AI",
+    "metres",
+    "meters",
+    "haunted",
+    "evidence of the paranormal",
+    "detects",
+    "detected",
+    "detecting",
+    "detection",
+    "detections",
+    "detector",
+    "detectors",
+    "proves",
+    "proved",
+    "proving",
+    "proofs",
+    "confirms",
+    "confirmed",
+    "confirming",
+    "confirmation",
+    "verifies",
+    "verified",
+    "verifying",
+    "verification",
+    "authenticity",
+    "scientifically",
+    "accurately",
+    "algorithms"
+  ],
+  "allowedPhrases": [
+    {
+      "phrase": "Nothing here is proof.",
+      "ruling": "addendum §B.4 row 27 (Camera tool copy) — the one ratified safe form that still contains a banned token"
+    }
+  ],
+  "bannedCharacters": ["%"],
+  "bannedPatterns": [
+    "\\b(thousands|millions|awards?|best-seller|most popular)\\b",
+    "\\b(scan|scans|scanning|scanned|search|searching|loading|analysing|analyzing|processing|progress|progressing|telemetry)\\b"
+  ],
+  "$approvedMarketTerms": "The §B.3 closed market vocabulary. It is a writer's reference — the words marketing MAY use — not a blocklist: the lint never fails on a marketing string for lacking one of these, it only fails on the banned terms, patterns and characters above.",
+  "approvedMarketTerms": [
+    "paranormal",
+    "ghost hunt",
+    "cryptid",
+    "investigator",
+    "field journal",
+    "EMF",
+    "EVP",
+    "spooky",
+    "adventure",
+    "night"
+  ],
+  "surfaces": [
+    {
+      "key": "ui.entertainment-line",
+      "path": "src/data/strings/entertainment.ts",
+      "kind": "ui-string-table"
+    },
+    {
+      "key": "ui.about-notice",
+      "path": "src/data/strings/aboutNotice.ts",
+      "kind": "about-notice"
+    },
+    {
+      "key": "ui.string-table-barrel",
+      "path": "src/data/strings/index.ts",
+      "kind": "ui-string-table"
+    },
+    {
+      "key": "native.ios-purpose-strings",
+      "path": "app.config.ts",
+      "kind": "ios-purpose-string"
+    },
+    {
+      "key": "native.android-permissions",
+      "path": "app.config.ts",
+      "kind": "android-permission-string"
+    },
+    {
+      "key": "store.title",
+      "path": "assets/store/listing.json",
+      "kind": "store-title"
+    },
+    {
+      "key": "store.subtitle",
+      "path": "assets/store/listing.json",
+      "kind": "store-subtitle"
+    },
+    {
+      "key": "store.description",
+      "path": "assets/store/listing.json",
+      "kind": "store-description"
+    },
+    {
+      "key": "store.screenshot-captions",
+      "path": "assets/store/listing.json",
+      "kind": "screenshot-caption"
+    }
+  ],
+  "shippedCharacterScope": [
+    "app.config.ts",
+    "assets/store",
+    "src/app",
+    "src/data",
+    "src/db",
+    "src/engine",
+    "src/features",
+    "src/services",
+    "src/ui/components",
+    "src/util"
+  ]
+}

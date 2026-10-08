@@ -13,7 +13,8 @@
     "lint": "eslint . --ignore-pattern 'src/**/__boundary_fixtures__/**'",
     "test": "jest",
     "grain:check": "node scripts/check-grain.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run test",
+    "claims:check": "node scripts/claims-lint.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run claims:check",
     "bundle": "expo export --platform ios"
   },
   "dependencies": {

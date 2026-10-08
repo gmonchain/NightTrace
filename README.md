@@ -59,7 +59,7 @@ APP_VARIANT=preview npx expo prebuild --clean
 ## Verifying
 
 ```sh
-npm run verify     # typecheck + lint + test — the same entrypoint CI runs
+npm run verify     # typecheck + lint + test + claims — the same entrypoint CI runs
 npm run bundle     # expo export --platform ios — proves the route tree bundles
 ```
 
@@ -69,6 +69,7 @@ Individually:
 npm run typecheck  # tsc --noEmit; strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes + noImplicitOverride
 npm run lint       # ESLint boundary rules (AD-1 four-layer table, AD-12 SQL & route containment, AD-17 raw values, AD-30 console)
 npm test           # both Jest projects: `engine` on the node preset, `ui` on jest-expo
+npm run claims:check  # the claims lint (AD-16) over the declared string-surface set
 npm run bundle     # iOS export; fails on a route under src/app/** that cannot resolve
 ```
 
@@ -132,11 +133,43 @@ config.
 
 `.github/workflows/ci.yml` runs `npm run verify`, and that entrypoint is where
 the gates run: the token-sync test (AD-17) is a `ui`-project Jest suite, so
-`npm test` runs it, and the AD-17 raw-value lint is defined in `eslint.config.js`
-and run by `npm run lint`. Gates belonging to later stories — the claims lint
-(AD-16), content validation and aliases (AD-9, AD-18), migration idempotency
-(AD-22) and the golden-seed replay (AD-3) — are appended to `ci.yml` by the story
-that builds them.
+`npm test` runs it; the AD-17 raw-value lint is defined in `eslint.config.js`
+and run by `npm run lint`; and Story 1.5's claims lint
+(`npm run claims:check`, AD-16 / NFR-18) is the last link of the `verify` chain.
+One further gate is appended to `ci.yml` as its own step by the story that built
+it — Story 1.4's grain-reproducibility check (`npm run grain:check`) — and the
+claims lint runs there once more, over the committed tree. Gates belonging to
+later stories — content validation and aliases (AD-9, AD-18), migration
+idempotency (AD-22) and the golden-seed replay (AD-3) — are appended the same
+way.
+
+**The claims lint (AD-16 / NFR-18).** No shipped sentence may assert anything
+about the real world. `npm run claims:check` reads the declared, enumerated
+string-surface set in `scripts/claims/config.json` — the UI string tables, the
+iOS `Info.plist` purpose strings, the Android manifest permission strings, the
+store title, subtitle and description, the screenshot captions and the About
+notice — and fails with exit 1 printing the token, the file and the line when a
+banned term from addendum §B.2, a banned statistic/social-proof/fake-telemetry
+pattern, or the `%` character appears. **Coverage is the declared set, not the
+app binary (AD-16): a string on a file that is not a declared surface is not
+covered.** The `%` ban additionally covers the enumerated
+`shippedCharacterScope`; that scope deliberately excludes `src/ui/theme/**`,
+whose only `%` is the Seal's SVG filter-region value (recorded as a
+release-review item in `docs/review-items.md`). Matching is whole-word/phrase and
+case-insensitive, minus the enumerated `allowedPhrases` list of §B.4-ratified
+safe forms (row 27's `Nothing here is proof.` is the only one). The entertainment
+line is one exported constant (`src/data/strings/entertainment.ts`) that every
+surface imports. `src/config/__tests__/claims.test.ts` asserts the set's
+coverage, so a new string table cannot be added without appearing in the set;
+`approvedMarketTerms` is the §B.3 vocabulary marketing may use — a writer's
+reference, not a blocklist.
+
+**What the claims lint cannot see.** It parses strings and nothing else: images,
+mechanics, juxtaposition, visual hierarchy, and the sum of individually-safe
+sentences are structurally out of its reach. Those five AD-16 blind spots, and
+NFR-20's store-metadata review against App Store guidelines 2.3.1/2.3.7, are
+release-review items in `docs/review-items.md` — a passing build is evidence
+about strings and nothing else.
 
 **The AD-17 raw-value lint.** A component reads tokens from
 `src/ui/theme/tokens.ts` and never hard-codes a raw value. The rule fires on a
