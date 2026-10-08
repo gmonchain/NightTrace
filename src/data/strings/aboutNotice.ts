@@ -46,6 +46,17 @@ export type AboutSensorRow = {
 /** The note every sensor row carries (addendum §B.5). */
 export const ABOUT_NOTICE_SENSOR_NOTE = 'Only while in use.' as const;
 
+/**
+ * The heading of the section that carries the sensor inventory (addendum §B.5).
+ *
+ * Exported as a named constant so a consumer can identify the inventory section
+ * **structurally** — by its heading — rather than by matching a substring of the
+ * prose, which would misfire on any section whose text happens to contain the
+ * sensor note. The section below uses this constant for its heading, so the two
+ * cannot drift.
+ */
+export const ABOUT_NOTICE_SENSOR_HEADING = 'SENSORS USED' as const;
+
 /** The sensors the app can use, each marked "Only while in use." (§B.5). */
 export const ABOUT_NOTICE_SENSORS: readonly AboutSensorRow[] = [
   { sensor: 'Microphone', note: ABOUT_NOTICE_SENSOR_NOTE },
@@ -73,7 +84,7 @@ export const ABOUT_NOTICE_SECTIONS: readonly AboutNoticeSection[] = [
     ],
   },
   {
-    heading: 'SENSORS USED',
+    heading: ABOUT_NOTICE_SENSOR_HEADING,
     paragraphs: [`${SENSOR_INVENTORY} — ${ABOUT_NOTICE_SENSOR_NOTE}`],
   },
   {

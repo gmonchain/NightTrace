@@ -12,6 +12,7 @@ export { ENTERTAINMENT_LINE } from './entertainment';
 export {
   ABOUT_NOTICE,
   ABOUT_NOTICE_SECTIONS,
+  ABOUT_NOTICE_SENSOR_HEADING,
   ABOUT_NOTICE_SENSORS,
   ABOUT_NOTICE_SENSOR_NOTE,
   type AboutNoticeSection,
@@ -24,3 +25,9 @@ export {
   type OnboardingScreenCopy,
   type OnboardingScreenKey,
 } from './onboarding';
+export {
+  ABOUT_NOTICE_COPY,
+  PROFILE_COPY,
+  type AboutCopy,
+  type ProfileCopy,
+} from './profile';

@@ -85,6 +85,11 @@
       "kind": "ui-string-table"
     },
     {
+      "key": "ui.profile-copy",
+      "path": "src/data/strings/profile.ts",
+      "kind": "ui-string-table"
+    },
+    {
       "key": "ui.onboarding-copy",
       "path": "src/data/strings/onboarding.ts",
       "kind": "ui-string-table"

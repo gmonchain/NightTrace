@@ -136,6 +136,19 @@ const FIXTURE_EXPECTATIONS: readonly Expectation[] = [
     ruleId: 'no-restricted-imports',
     ad: 'Story 1.6',
   },
+  {
+    // Story 1.7 extends the same claim to the About feature files: the notice
+    // surface may not import a sensor or permission module.
+    file: 'src/features/about/__boundary_fixtures__/import-expo-camera.ts',
+    ruleId: 'no-restricted-imports',
+    ad: 'Story 1.7',
+  },
+  {
+    // ...and to the Profile feature files: the Profile body may not either.
+    file: 'src/features/profile/__boundary_fixtures__/import-expo-sensors.ts',
+    ruleId: 'no-restricted-imports',
+    ad: 'Story 1.7',
+  },
 ];
 
 describe('boundary fixtures are rejected by ESLint', () => {
@@ -635,5 +648,60 @@ describe('four-layer import containment (AD-1)', () => {
     expectImport('@/db/kv', 'src/features/x.ts', { rejected: false });
     expectImport('@/sensors/hub', 'src/services/x.ts', { rejected: false });
     expectImport('@/services/Logger', 'src/ui/x.ts', { rejected: false });
+  });
+});
+
+/**
+ * Story 1.7's zero-permission / zero-sensor claim on the Profile→About path.
+ *
+ * The feature-file half is witnessed by the two committed fixtures above; the
+ * route half — the three files actually on the path (`src/app/(modals)/about.tsx`,
+ * `src/app/(tabs)/profile.tsx`, `src/app/index.tsx`) — is witnessed here with
+ * `lintText`, because a fixture under `src/app/**` would itself become a route
+ * the export must resolve (see the README's "Nothing may sit under src/app
+ * except real routes"). The route blocks re-declare `no-restricted-imports`, so
+ * the AD-12 engine/db patterns must survive alongside the sensor ban —
+ * last-match-wins replaced the route block's list.
+ */
+describe('the Profile-to-About path boundary (Story 1.7)', () => {
+  it.each([
+    ['src/app/(modals)/about.tsx', 'the About sheet route'],
+    ['src/app/(tabs)/profile.tsx', 'the Profile route'],
+    // The placeholder home is on the path (it is what links to Profile) and is
+    // the file the story modifies; the ban must reach it too.
+    ['src/app/index.tsx', 'the placeholder home route'],
+  ])('rejects a sensor import in %s (%s) naming Story 1.7', (filename) => {
+    const messages = lintText("import * as Camera from 'expo-camera';\n", filename);
+    const violations = messages.filter(
+      (message) =>
+        message.ruleId === 'no-restricted-imports' &&
+        message.message.includes('Story 1.7'),
+    );
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.severity).toBe(2);
+  });
+
+  it('permits a route on the path that imports only Shell modules below it', () => {
+    const messages = lintText(
+      "import { Sheet } from '@/ui/components';\nexport const x = Sheet;\n",
+      'src/app/(modals)/about.tsx',
+    );
+    const violations = messages.filter(
+      (message) => message.ruleId === 'no-restricted-imports',
+    );
+    expect(violations).toEqual([]);
+  });
+
+  it('keeps the route block’s AD-12 engine/db ban alive on the new routes', () => {
+    const messages = lintText(
+      "import { kv } from '@/db/kv';\nexport const x = kv;\n",
+      'src/app/(tabs)/profile.tsx',
+    );
+    const violations = messages.filter(
+      (message) =>
+        message.ruleId === 'no-restricted-imports' &&
+        message.message.includes('AD-12'),
+    );
+    expect(violations).toHaveLength(1);
   });
 });

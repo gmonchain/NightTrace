@@ -1,13 +1,22 @@
-import { Redirect } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { PROFILE_COPY } from '@/data/strings';
 import {
   nextOnboardingDestination,
   onboardingService,
   type OnboardingDestination,
   type OnboardingScreen,
 } from '@/services/OnboardingService';
+import {
+  colors,
+  components,
+  rounded,
+  spacing,
+  typography,
+} from '@/ui/theme/tokens';
+import { textStyle } from '@/ui/theme/type';
 
 /**
  * The first-launch gate (Story 1.6).
@@ -48,7 +57,11 @@ export function onboardingHref(screen: OnboardingScreen): OnboardingHref {
   }
 }
 
+/** The link label's type style, through the one em→point conversion. */
+const linkLabelStyle = textStyle(typography.label);
+
 export default function Index(): React.JSX.Element | null {
+  const router = useRouter();
   const [destination, setDestination] = useState<OnboardingDestination | null>(
     null,
   );
@@ -73,10 +86,24 @@ export default function Index(): React.JSX.Element | null {
   }
 
   if (destination === 'home') {
-    // Placeholder home; Story 1.8 replaces this with the four-tab shell.
+    // Placeholder home; Story 1.8 replaces this with the four-tab shell. Until
+    // then, the one link below is what makes the Profile destination (and, from
+    // it, the About notice) reachable (Story 1.7).
     return (
       <View style={styles.container}>
         <Text style={styles.title}>NightTrace</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={PROFILE_COPY.homeLinkLabel}
+          onPress={() => {
+            router.push('/profile');
+          }}
+          style={styles.link}
+        >
+          <Text style={[linkLabelStyle, styles.linkLabel]}>
+            {PROFILE_COPY.homeLinkLabel}
+          </Text>
+        </Pressable>
       </View>
     );
   }
@@ -88,9 +115,20 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     flex: 1,
+    gap: spacing['5'],
     justifyContent: 'center',
   },
   title: {
     fontSize: 24,
+  },
+  link: {
+    borderColor: colors['rule-strong'],
+    borderRadius: rounded.DEFAULT,
+    borderWidth: components.rule.height,
+    paddingHorizontal: spacing['6'],
+    paddingVertical: spacing['4'],
+  },
+  linkLabel: {
+    color: colors.bone,
   },
 });

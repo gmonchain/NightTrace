@@ -388,6 +388,35 @@ const AD17_EXEMPT_TOKEN_FILE = ['src/ui/theme/tokens.ts'];
 const ONBOARDING_FEATURE = ['src/features/onboarding/**/*.{ts,tsx}'];
 const ONBOARDING_ROUTES = ['src/app/(onboarding)/**/*.{ts,tsx}'];
 
+// --- Story 1.7: the Profile→About path requests no permission, reads no sensor -
+//
+// The zero-permission playability constraint covers the About path too: a user
+// who reaches About with nothing granted must see every screen render and no
+// prompt. The same closed module list the onboarding path bans is extended to
+// the About/Profile feature files and routes, so the AC's claim is a gate rather
+// than a comment. `ONBOARDING_MODULE_BAN` is reused verbatim — it is the sensor/
+// permission/audio/camera/notification set the constraint names, not an
+// onboarding-specific list.
+//
+// The route scope is the **three files actually on the Profile→About path** —
+// the About sheet, the Profile route, and the placeholder home that links to
+// Profile — not whole groups. Banning all of `src/app/(modals)/**` and
+// `src/app/(tabs)/**` would be a gate far wider than the story's claim: the
+// arch spine gives `(modals)` the product's permissions sheet (which *must*
+// request a permission) and `(tabs)` INVESTIGATE / FIELD JOURNAL (which later
+// epics give sensors), and those legitimate imports must not be blocked here.
+// `src/app/index.tsx` is included because it is on the path and is the file the
+// story modifies; it was previously outside the scope entirely.
+const ABOUT_PROFILE_FEATURE = [
+  'src/features/about/**/*.{ts,tsx}',
+  'src/features/profile/**/*.{ts,tsx}',
+];
+const ABOUT_PROFILE_ROUTES = [
+  'src/app/(modals)/about.tsx',
+  'src/app/(tabs)/profile.tsx',
+  'src/app/index.tsx',
+];
+
 const ONBOARDING_MODULE_BAN = [
   'expo-sensors',
   'expo-sensors/*',
@@ -412,6 +441,11 @@ const ONBOARDING_MODULE_BAN = [
 const ONBOARDING_NO_PERMISSION_MESSAGE =
   'Story 1.6: the onboarding path requests no permission and reads no sensor. ' +
   'A screen on this path may not import expo-sensors, expo-location, ' +
+  'expo-camera, expo-av, expo-audio or expo-notifications.';
+
+const ABOUT_NO_PERMISSION_MESSAGE =
+  'Story 1.7: the Profile-to-About path requests no permission and reads no ' +
+  'sensor. A screen on this path may not import expo-sensors, expo-location, ' +
   'expo-camera, expo-av, expo-audio or expo-notifications.';
 
 module.exports = defineConfig([
@@ -611,6 +645,46 @@ module.exports = defineConfig([
             {
               group: ONBOARDING_MODULE_BAN,
               message: ONBOARDING_NO_PERMISSION_MESSAGE,
+            },
+            {
+              group: ['@/engine/**', '**/engine/**', '@/db/**', '**/db/**'],
+              message: AD12_IMPORT_MESSAGE,
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Story 1.7: the About/Profile feature files gain only the sensor/permission
+  // import ban. Like the onboarding feature files they carried no
+  // `no-restricted-imports` before — the Shell block declares only
+  // `no-restricted-syntax` — so this replaces nothing and their SQL / console /
+  // AD-17 syntax selectors are untouched.
+  {
+    files: ABOUT_PROFILE_FEATURE,
+    rules: {
+      'no-restricted-imports': importBan(
+        ONBOARDING_MODULE_BAN,
+        ABOUT_NO_PERMISSION_MESSAGE,
+      ),
+    },
+  },
+
+  // The About/Profile routes: declaring `no-restricted-imports` here replaces
+  // the route block's AD-12 ban (same rule id) for these files, so its
+  // engine/db patterns are re-included alongside the sensor ban —
+  // last-match-wins, exactly as the onboarding routes block does.
+  {
+    files: ABOUT_PROFILE_ROUTES,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ONBOARDING_MODULE_BAN,
+              message: ABOUT_NO_PERMISSION_MESSAGE,
             },
             {
               group: ['@/engine/**', '**/engine/**', '@/db/**', '**/db/**'],
