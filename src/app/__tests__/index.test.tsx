@@ -94,12 +94,13 @@ describe('the first-launch gate', () => {
     },
   );
 
-  it('renders the home placeholder once acknowledged and complete', async () => {
+  it('redirects a complete install to the HOME tab', async () => {
     const { getPathname } = await renderGate({ acknowledged: true, step: 4 });
 
-    await waitFor(() => expect(screen.getByText('NightTrace')).toBeTruthy());
-    expect(getPathname()).toBe('/');
-    // It rendered the placeholder rather than redirecting back into onboarding.
+    // Story 1.8: the gate's `home` branch redirects to the four-tab shell's
+    // HOME tab (`/` is the gate's own path, so HOME lives at `/home`).
+    await waitFor(() => expect(getPathname()).toBe('/home'));
+    // It went into the shell rather than back into onboarding.
     expect(screen.queryByText(ONBOARDING_COPY.notice.headline)).toBeNull();
   });
 

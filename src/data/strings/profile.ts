@@ -5,9 +5,9 @@
  * a `ui-string-table` surface, so Story 1.5's claims lint checks every string
  * here like any other shipped sentence (banned terms, the banned patterns, the
  * `%` character). It holds only the *UI chrome* for the Profile→About path: the
- * Profile screen title, the `About & entertainment` row label, the temporary
- * placeholder-home link label, and the notice's close action. The notice
- * *content* is Story 1.5's `ABOUT_NOTICE` table and is never authored here.
+ * Profile screen title, the `About & entertainment` row label, and the notice's
+ * close action. The notice *content* is Story 1.5's `ABOUT_NOTICE` table and is
+ * never authored here.
  *
  * None of these lines assert anything about the real world, so they read clean
  * under the claims lint; `About & entertainment` is the label `EXPERIENCE.md`'s
@@ -20,12 +20,6 @@ export type ProfileCopy = {
   readonly title: string;
   /** The row that opens the About notice — a normal Profile destination. */
   readonly aboutRowLabel: string;
-  /**
-   * The temporary placeholder-home link that makes Profile reachable before
-   * Story 1.8 lands the four-tab shell (which replaces both the placeholder and
-   * this link).
-   */
-  readonly homeLinkLabel: string;
 };
 
 /** The About notice's own action copy (Story 1.7). */
@@ -37,7 +31,6 @@ export type AboutCopy = {
 export const PROFILE_COPY: ProfileCopy = {
   title: 'Profile',
   aboutRowLabel: 'About & entertainment',
-  homeLinkLabel: 'Profile',
 };
 
 export const ABOUT_NOTICE_COPY: AboutCopy = {

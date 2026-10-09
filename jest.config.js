@@ -18,6 +18,13 @@ process.env.NODE_ENV = 'test';
  * for the shell's React surfaces.
  */
 module.exports = {
+  // The route-tree suites render the whole `src/app` tree (react-navigation +
+  // the tabs navigator) through `renderRouter`, whose first render in a worker
+  // pays the module-load cost; under parallel load that first render can exceed
+  // Jest's 5s default. `testTimeout` is a **global** option — a per-project
+  // entry is silently dropped by Jest 29, so the ceiling is set here at the
+  // root where it actually applies. A genuinely hanging test still fails, later.
+  testTimeout: 60000,
   projects: [
     {
       displayName: 'engine',

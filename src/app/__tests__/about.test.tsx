@@ -25,11 +25,10 @@ import { colors } from '@/ui/theme/tokens';
  * OPEN_ABOUT walks Profile → the About sheet, and CLOSE_ABOUT walks back to
  * Profile; a second case asserts the notice is presented *inside the `Sheet`
  * surface* (its panel, scrim and grabber), since dropping the wrapper would
- * otherwise ship green. (The placeholder-home link that makes Profile reachable
- * before Story 1.8 lands is exercised in `home.test.tsx`, and the cold-deep-link
- * close arm in `aboutDeepLink.test.tsx` — both kept separate because the
- * harness's module-global router store is not reset between renders within one
- * file, so a file holds at most one *press-navigation* test.)
+ * otherwise ship green. (The cold-deep-link close arm lives in
+ * `aboutDeepLink.test.tsx`, kept separate because the harness's module-global
+ * router store is not reset between renders within one file, so a file holds at
+ * most one *press-navigation* test.)
  *
  * `Animated.timing` is spied out so the `Sheet`'s entrance never advances a
  * frame under the test renderer (the Story 1.4 `Sheet` suite's convention), and
@@ -112,7 +111,7 @@ describe('the Profile-to-About path over the real route tree', () => {
     // A non-pressing render, kept ahead of the one press-navigation test in this
     // file: the harness's module-global router store is not reset between
     // renders, so a second *press-navigation* render would have its effects
-    // swallowed (the `home.test.tsx` convention).
+    // swallowed (the `index.test.tsx` convention).
     const router = renderRouter('./src/app', { initialUrl: '/about' });
     await router;
     await waitFor(() =>

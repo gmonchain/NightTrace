@@ -20,7 +20,7 @@ import { setReduceMotion, spyOnTiming } from '@/ui/components/__tests__/tree';
  *
  * It lives in its own file because the harness's module-global router store is
  * not reset between renders within a file: a *press-navigation* test after
- * another sees its effects swallowed (the `home.test.tsx` convention — one
+ * another sees its effects swallowed (the `index.test.tsx` convention — one
  * press-navigation test per file). `Animated.timing` is spied out so the
  * `Sheet`'s entrance never advances under the test renderer, and Reduce Motion
  * keeps the panel presented at rest.
