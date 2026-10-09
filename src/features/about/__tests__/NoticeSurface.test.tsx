@@ -63,7 +63,7 @@ function textNodeWith(root: HostElement | null, value: string): HostElement {
 }
 
 function renderSurface() {
-  const onClose = jest.fn();
+  const onClose = vi.fn();
   return render(<NoticeSurface onClose={onClose} />).then((result) => ({
     onClose,
     ...result,

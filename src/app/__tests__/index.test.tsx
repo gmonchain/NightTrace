@@ -4,41 +4,39 @@ import {
   screen,
   testRouter,
   waitFor,
-} from 'expo-router/testing-library';
+} from 'vitest-expo/router';
 
 import { ONBOARDING_COPY } from '@/data/strings';
 import { onboardingService } from '@/services/OnboardingService';
 
 import { onboardingHref } from '../index';
+import { appRoutes } from './routes';
 
 /**
  * Story 1.6 — the first-launch gate's route decision, exercised end to end.
  *
  * The gate's `onboardingHref` mapping is otherwise module-private and the route
  * decision never runs under a render, so a transposed href ships green. Here
- * `renderRouter` mounts the real `src/app` tree and asserts the pathname the
- * gate lands on for each onboarding state; the service is mocked so a test can
- * drive every state without the native settings backend.
+ * `renderRouter` mounts the real `src/app` tree (the `appRoutes` context) and
+ * asserts the pathname the gate lands on for each onboarding state; the service
+ * is mocked so a test can drive every state without the native settings backend.
  *
  * `@testing-library/react-native` v14's `render` is async, so the render's
  * promise is awaited before its effects settle and `screen` carries the queries;
- * `getPathname` rides on the promise expo-router returns.
+ * `getPathname` rides on the promise `renderRouter` returns.
  */
 
-jest.mock('@/services/OnboardingService', () => {
-  const actual = jest.requireActual('@/services/OnboardingService');
-  return {
-    ...actual,
-    onboardingService: {
-      readOnboardingState: jest.fn(),
-      acknowledgeNotice: jest.fn(),
-      setStep: jest.fn(),
-      complete: jest.fn(),
-    },
-  };
-});
+vi.mock('@/services/OnboardingService', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/services/OnboardingService')>()),
+  onboardingService: {
+    readOnboardingState: vi.fn(),
+    acknowledgeNotice: vi.fn(),
+    setStep: vi.fn(),
+    complete: vi.fn(),
+  },
+}));
 
-const service = jest.mocked(onboardingService);
+const service = vi.mocked(onboardingService);
 
 /** Mount the gate at `/` and wait for its async read to settle. */
 async function renderGate(state: {
@@ -46,24 +44,23 @@ async function renderGate(state: {
   readonly step: number;
 }): Promise<{ readonly getPathname: () => string }> {
   service.readOnboardingState.mockResolvedValue(state);
-  const router = renderRouter('./src/app', { initialUrl: '/' });
+  const router = await renderRouter(appRoutes, { initialUrl: '/' });
   // The render promise resolves once the initial tree and its effects flush;
   // `getPathname` stays on the promise expo-router returned.
-  await router;
   await waitFor(() => expect(service.readOnboardingState).toHaveBeenCalled());
   return { getPathname: () => router.getPathname() };
 }
 
 describe('the first-launch gate', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service.acknowledgeNotice.mockResolvedValue(undefined);
     service.setStep.mockResolvedValue(undefined);
     service.complete.mockResolvedValue(true);
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('maps each onboarding destination to its own href', () => {

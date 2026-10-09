@@ -68,7 +68,7 @@ describe('EvidenceCard', () => {
   });
 
   it('CAPTURE_ACTIONS: Keep resolves `kept` exactly once and dismisses', async () => {
-    const onResolve = jest.fn();
+    const onResolve = vi.fn();
     const { getByText, queryByText } = await render(
       <EvidenceCard
         {...CARD}
@@ -83,7 +83,7 @@ describe('EvidenceCard', () => {
   });
 
   it('CAPTURE_ACTIONS: Mark as explained resolves `explained` exactly once and dismisses', async () => {
-    const onResolve = jest.fn();
+    const onResolve = vi.fn();
     const { getByText, queryByText } = await render(
       <EvidenceCard
         {...CARD}
@@ -98,7 +98,7 @@ describe('EvidenceCard', () => {
   });
 
   it('a resolved card never fires a second callback', async () => {
-    const onResolve = jest.fn();
+    const onResolve = vi.fn();
     const { getByText } = await render(
       <EvidenceCard {...CARD} certainty="AMBIGUOUS" onResolve={onResolve} />,
     );
@@ -109,7 +109,7 @@ describe('EvidenceCard', () => {
   });
 
   it('a reused instance handed a new item resolves it', async () => {
-    const onResolve = jest.fn();
+    const onResolve = vi.fn();
     const { getByText, queryByText, rerender } = await render(
       <EvidenceCard {...CARD} certainty="AMBIGUOUS" onResolve={onResolve} />,
     );
@@ -198,9 +198,9 @@ describe('EvidenceCard', () => {
   it('CAPTURE_AUTODISMISS: reports `unreviewed` and dismisses when left alone', async () => {
     const restore = setReduceMotion(false);
     const spy = spyOnTiming();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
-      const onResolve = jest.fn();
+      const onResolve = vi.fn();
       const { queryByText } = await render(
         <EvidenceCard {...CARD} certainty="AMBIGUOUS" capture onResolve={onResolve} />,
       );
@@ -208,13 +208,13 @@ describe('EvidenceCard', () => {
       expect(onResolve).not.toHaveBeenCalled();
 
       await act(async () => {
-        jest.advanceTimersByTime(EVIDENCE_AUTO_DISMISS_MS);
+        vi.advanceTimersByTime(EVIDENCE_AUTO_DISMISS_MS);
       });
       expect(onResolve).toHaveBeenCalledTimes(1);
       expect(onResolve).toHaveBeenCalledWith('unreviewed');
       expect(queryByText('Keep')).toBeNull();
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
       spy.timing.mockRestore();
       restore();
     }
@@ -223,9 +223,9 @@ describe('EvidenceCard', () => {
   it('drops the capture entrance and the hairline under Reduce Motion but still dismisses', async () => {
     const restore = setReduceMotion(true);
     const spy = spyOnTiming();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
-      const onResolve = jest.fn();
+      const onResolve = vi.fn();
       const { queryByText, toJSON } = await render(
         <EvidenceCard {...CARD} certainty="AMBIGUOUS" capture onResolve={onResolve} />,
       );
@@ -242,12 +242,12 @@ describe('EvidenceCard', () => {
       expect(mergedStyle(root).opacity).toBe(1);
 
       await act(async () => {
-        jest.advanceTimersByTime(EVIDENCE_AUTO_DISMISS_MS);
+        vi.advanceTimersByTime(EVIDENCE_AUTO_DISMISS_MS);
       });
       expect(onResolve).toHaveBeenCalledWith('unreviewed');
       expect(queryByText('Keep')).toBeNull();
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
       spy.timing.mockRestore();
       restore();
     }

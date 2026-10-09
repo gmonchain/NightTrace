@@ -3,10 +3,12 @@ import {
   renderRouter,
   screen,
   waitFor,
-} from 'expo-router/testing-library';
+} from 'vitest-expo/router';
 
 import { ABOUT_NOTICE, ABOUT_NOTICE_COPY } from '@/data/strings';
 import { setReduceMotion, spyOnTiming } from '@/ui/components/__tests__/tree';
+
+import { appRoutes } from './routes';
 
 /**
  * Story 1.7 — the About route's cold-deep-link close arm (CLOSE_ABOUT).
@@ -40,12 +42,11 @@ describe('a cold deep-link to About', () => {
     restoreReduceMotion();
     // `renderRouter` turns on fake timers; restore them afterwards (the
     // `index.test.tsx` convention).
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('closes to Profile even with no history to pop', async () => {
-    const router = renderRouter('./src/app', { initialUrl: '/about' });
-    await router;
+    const router = await renderRouter(appRoutes, { initialUrl: '/about' });
 
     // The notice presents from the deep link.
     await waitFor(() =>

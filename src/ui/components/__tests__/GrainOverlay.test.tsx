@@ -6,6 +6,46 @@ import { GrainOverlay } from '../GrainOverlay';
 import type { HostElement } from './tree';
 import { find, mergedStyle } from './tree';
 
+/**
+ * Register the committed tile with React Native's asset registry, and return a
+ * restore callback.
+ *
+ * `Image` resolves a `source` string through `@react-native/assets-registry`
+ * and renders the resolved URL; the original assertion read the filename off
+ * that URL. Under jest-expo the `require`d PNG registered itself, so the URL
+ * carried the name. In this runner react-native is externalized to Node's CJS
+ * loader, the asset `require` is vitest-native's filename stub and never
+ * registers, so `Image` renders `{ uri: undefined }`. Registering the tile for
+ * the render restores exactly the resolution the assertion was written against,
+ * leaving the component and the committed PNG untouched.
+ */
+function registerTile(): () => void {
+  // The registry is react-native's own CJS module; an ESM import would be a
+  // second copy and would not be the one `Image` resolves through.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const registry = require('@react-native/assets-registry/registry') as {
+    getAssetByID: (id: unknown) => unknown;
+  };
+  const original = registry.getAssetByID;
+  registry.getAssetByID = (id: unknown) =>
+    id === 'grain.png'
+      ? {
+          __packager_asset: true,
+          fileSystemLocation: '/tmp/nighttrace',
+          httpServerLocation: '/assets/tmp/nighttrace',
+          width: 180,
+          height: 180,
+          scales: [1],
+          hash: 'grain',
+          name: 'grain',
+          type: 'png',
+        }
+      : original(id);
+  return () => {
+    registry.getAssetByID = original;
+  };
+}
+
 function rootOf(node: HostElement | null): HostElement {
   if (node === null) {
     throw new Error('GrainOverlay rendered nothing');
@@ -34,19 +74,24 @@ describe('GrainOverlay', () => {
   });
 
   it('composites the tiled asset at components.grain.opacity', async () => {
-    const { toJSON } = await render(<GrainOverlay />);
-    const root = rootOf(toJSON());
-    const image = find(root, (element) => element.type === 'Image');
-    expect(image).toBeDefined();
-    if (image === undefined) {
-      throw new Error('no tile image');
+    const restoreTile = registerTile();
+    try {
+      const { toJSON } = await render(<GrainOverlay />);
+      const root = rootOf(toJSON());
+      const image = find(root, (element) => element.type === 'Image');
+      expect(image).toBeDefined();
+      if (image === undefined) {
+        throw new Error('no tile image');
+      }
+      expect(image.props.resizeMode).toBe('repeat');
+      expect(image.props.tintColor).toBe(colors.bone);
+      // The token opacity, not a literal.
+      expect(mergedStyle(image).opacity).toBe(components.grain.opacity);
+      // The committed tile resolves through Metro's asset pipeline.
+      expect(String(JSON.stringify(image.props.source))).toContain('grain.png');
+    } finally {
+      restoreTile();
     }
-    expect(image.props.resizeMode).toBe('repeat');
-    expect(image.props.tintColor).toBe(colors.bone);
-    // The token opacity, not a literal.
-    expect(mergedStyle(image).opacity).toBe(components.grain.opacity);
-    // The committed tile resolves through Metro's asset pipeline.
-    expect(String(JSON.stringify(image.props.source))).toContain('grain.png');
   });
 
   it('pins the tile to the overlay’s bounds', async () => {
@@ -73,9 +118,9 @@ describe('GrainOverlay', () => {
   });
 
   it('never animates', async () => {
-    const timing = jest.spyOn(Animated, 'timing');
-    const loop = jest.spyOn(Animated, 'loop');
-    const spring = jest.spyOn(Animated, 'spring');
+    const timing = vi.spyOn(Animated, 'timing');
+    const loop = vi.spyOn(Animated, 'loop');
+    const spring = vi.spyOn(Animated, 'spring');
     try {
       await render(<GrainOverlay />);
       expect(timing).not.toHaveBeenCalled();

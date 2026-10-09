@@ -210,9 +210,13 @@ describe('Sheet', () => {
     const spy = spyOnTiming();
     try {
       const { toJSON } = await render(
-        <Sheet>
-          <Text>SHEET BODY</Text>
-        </Sheet>,
+        <SafeAreaInsetsContext.Provider
+          value={{ top: 0, bottom: 0, left: 0, right: 0 }}
+        >
+          <Sheet>
+            <Text>SHEET BODY</Text>
+          </Sheet>
+        </SafeAreaInsetsContext.Provider>,
       );
       const root = toJSON();
       if (root === null) {
@@ -225,8 +229,11 @@ describe('Sheet', () => {
       if (panel === undefined) {
         throw new Error('no panel');
       }
-      // The panel's real padding, read from the tokens (no inset outside a
-      // provider resolves to zero).
+      // The panel's real padding, read from the tokens. The inset is pinned to
+      // zero here rather than left to the runner's default: jest-expo resolved
+      // no provider to `bottom: 0`, but vitest-native models a real device
+      // (`bottom: 34`), so the base padding is asserted against an explicit zero
+      // inset and the sibling test covers the nonzero case.
       const panelStyle = mergedStyle(panel);
       expect(panelStyle.paddingHorizontal).toBe(spacing['6']);
       expect(panelStyle.paddingTop).toBe(spacing['3']);

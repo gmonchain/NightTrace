@@ -85,7 +85,7 @@ describe('app.config.ts resolves one variant into one identity', () => {
   });
 
   it('falls back to dev and warns for an unrecognised APP_VARIANT', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     try {
       const config = resolveFor('prod');
       expect(config.name).toBe('NightTrace Dev');

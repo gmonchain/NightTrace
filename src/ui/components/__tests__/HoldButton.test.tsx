@@ -26,8 +26,8 @@ function fillNode(view: HostElement): HostElement | undefined {
 describe('HoldButton', () => {
   it('HOLD_COMPLETE: the enter fill runs the token duration and completes once', async () => {
     const spy = spyOnTiming();
-    const onComplete = jest.fn();
-    const onCancel = jest.fn();
+    const onComplete = vi.fn();
+    const onCancel = vi.fn();
     try {
       const { getByLabelText } = await render(
         <HoldButton
@@ -59,8 +59,8 @@ describe('HoldButton', () => {
 
   it('HOLD_SEAL: the seal variant runs over the seal duration and never swaps its label', async () => {
     const spy = spyOnTiming();
-    const onComplete = jest.fn();
-    const onCancel = jest.fn();
+    const onComplete = vi.fn();
+    const onCancel = vi.fn();
     try {
       const { getByLabelText, queryByText } = await render(
         <HoldButton
@@ -85,8 +85,8 @@ describe('HoldButton', () => {
 
   it('HOLD_EARLY_RELEASE: releasing before the duration cancels once with the soft-warning reason', async () => {
     const spy = spyOnTiming();
-    const onComplete = jest.fn();
-    const onCancel = jest.fn();
+    const onComplete = vi.fn();
+    const onCancel = vi.fn();
     try {
       const { getByLabelText } = await render(
         <HoldButton
@@ -111,8 +111,8 @@ describe('HoldButton', () => {
 
   it('firing the stopped animation does not complete after an early release', async () => {
     const spy = spyOnTiming();
-    const onComplete = jest.fn();
-    const onCancel = jest.fn();
+    const onComplete = vi.fn();
+    const onCancel = vi.fn();
     try {
       const { getByLabelText } = await render(
         <HoldButton
@@ -139,8 +139,8 @@ describe('HoldButton', () => {
   it('HOLD_LABEL_SWAP: the label swaps at half the enter duration and only for the enter hold', async () => {
     const spy = spyOnTiming();
     try {
-      const onComplete = jest.fn();
-      const onCancel = jest.fn();
+      const onComplete = vi.fn();
+      const onCancel = vi.fn();
       const { getByLabelText, queryByText } = await render(
         <HoldButton
           variant="enter"
@@ -154,13 +154,13 @@ describe('HoldButton', () => {
         components['hold-button'].fillDurations.enterMs / 2,
       );
 
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       try {
         await fireEvent(button, 'pressIn');
         expect(queryByText(LABEL)).toBeTruthy();
         expect(queryByText(HOLD_SWAP_LABEL)).toBeNull();
         await act(async () => {
-          jest.advanceTimersByTime(
+          vi.advanceTimersByTime(
             components['hold-button'].fillDurations.enterMs / 2,
           );
         });
@@ -169,7 +169,7 @@ describe('HoldButton', () => {
         expect(queryByText(LABEL)).toBeTruthy();
         expect(queryByText(HOLD_SWAP_LABEL)).toBeNull();
       } finally {
-        jest.useRealTimers();
+        vi.useRealTimers();
       }
     } finally {
       spy.timing.mockRestore();
@@ -178,9 +178,9 @@ describe('HoldButton', () => {
 
   it('fires the callbacks from the latest render, not the ones captured at press-in', async () => {
     const spy = spyOnTiming();
-    const firstComplete = jest.fn();
-    const secondComplete = jest.fn();
-    const onCancel = jest.fn();
+    const firstComplete = vi.fn();
+    const secondComplete = vi.fn();
+    const onCancel = vi.fn();
     try {
       const { getByLabelText, rerender } = await render(
         <HoldButton
@@ -214,9 +214,9 @@ describe('HoldButton', () => {
 
   it('clears the swap timer and stops the fill when unmounted mid-hold', async () => {
     const spy = spyOnTiming();
-    const onComplete = jest.fn();
-    const onCancel = jest.fn();
-    jest.useFakeTimers();
+    const onComplete = vi.fn();
+    const onCancel = vi.fn();
+    vi.useFakeTimers();
     try {
       const { getByLabelText, unmount } = await render(
         <HoldButton
@@ -231,22 +231,22 @@ describe('HoldButton', () => {
       // The fill is stopped, and advancing past the swap point fires nothing.
       expect(spy.stopCount()).toBe(1);
       await act(async () => {
-        jest.advanceTimersByTime(
+        vi.advanceTimersByTime(
           components['hold-button'].fillDurations.enterMs,
         );
       });
       expect(onComplete).not.toHaveBeenCalled();
       expect(onCancel).not.toHaveBeenCalled();
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
       spy.timing.mockRestore();
     }
   });
 
   it('completes from an assistive-technology activation rather than cancelling', async () => {
     const spy = spyOnTiming();
-    const onComplete = jest.fn();
-    const onCancel = jest.fn();
+    const onComplete = vi.fn();
+    const onCancel = vi.fn();
     try {
       const { getByLabelText } = await render(
         <HoldButton
@@ -273,8 +273,8 @@ describe('HoldButton', () => {
         <HoldButton
           variant="enter"
           label="hold to enter the field"
-          onComplete={jest.fn()}
-          onCancel={jest.fn()}
+          onComplete={vi.fn()}
+          onCancel={vi.fn()}
         />,
       );
       expect(getByText('HOLD TO ENTER THE FIELD')).toBeTruthy();
@@ -285,14 +285,14 @@ describe('HoldButton', () => {
 
   it('names the gesture and reports the hold state to assistive technology', async () => {
     const spy = spyOnTiming();
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     try {
       const { getByLabelText } = await render(
         <HoldButton
           variant="enter"
           label={LABEL}
-          onComplete={jest.fn()}
-          onCancel={jest.fn()}
+          onComplete={vi.fn()}
+          onCancel={vi.fn()}
         />,
       );
       const button = getByLabelText(LABEL);
@@ -303,7 +303,7 @@ describe('HoldButton', () => {
 
       await fireEvent(button, 'pressIn');
       await act(async () => {
-        jest.advanceTimersByTime(
+        vi.advanceTimersByTime(
           components['hold-button'].fillDurations.enterMs / 2,
         );
       });
@@ -311,7 +311,7 @@ describe('HoldButton', () => {
         text: HOLD_SWAP_LABEL,
       });
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
       spy.timing.mockRestore();
     }
   });
@@ -335,8 +335,8 @@ describe('HoldButton', () => {
         <HoldButton
           variant="enter"
           label={LABEL}
-          onComplete={jest.fn()}
-          onCancel={jest.fn()}
+          onComplete={vi.fn()}
+          onCancel={vi.fn()}
         />,
       );
       const root = toJSON();
@@ -368,8 +368,8 @@ describe('HoldButton', () => {
         <HoldButton
           variant="enter"
           label={LABEL}
-          onComplete={jest.fn()}
-          onCancel={jest.fn()}
+          onComplete={vi.fn()}
+          onCancel={vi.fn()}
         />,
       );
       const root = toJSON();
@@ -394,8 +394,8 @@ describe('HoldButton', () => {
         <HoldButton
           variant="enter"
           label={LABEL}
-          onComplete={jest.fn()}
-          onCancel={jest.fn()}
+          onComplete={vi.fn()}
+          onCancel={vi.fn()}
         />,
       );
       const button = getByLabelText(LABEL);

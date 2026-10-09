@@ -114,7 +114,7 @@ describe('the four onboarding screens', () => {
   it('ACKNOWLEDGE: screen 1 persists the acknowledgement and advances', async () => {
     const { storage, data } = fakeStorage();
     const service = createOnboardingService(createKv(storage));
-    const onAdvance = jest.fn();
+    const onAdvance = vi.fn();
 
     const { getByLabelText } = await render(
       <NoticeScreen service={service} onAdvance={onAdvance} />,
@@ -136,7 +136,7 @@ describe('the four onboarding screens', () => {
       removeItem: () => Promise.resolve(),
     };
     const service = createOnboardingService(createKv(failing));
-    const onAdvance = jest.fn();
+    const onAdvance = vi.fn();
 
     const { getByLabelText } = await render(
       <NoticeScreen service={service} onAdvance={onAdvance} />,
@@ -159,7 +159,7 @@ describe('the four onboarding screens', () => {
   it('PERSIST: screen 2 records position 2 and marks the second hairline', async () => {
     const { storage, data } = fakeStorage();
     const service = createOnboardingService(createKv(storage));
-    const onAdvance = jest.fn();
+    const onAdvance = vi.fn();
 
     const { getByLabelText, toJSON } = await render(
       <LocalScreen service={service} onAdvance={onAdvance} />,
@@ -176,7 +176,7 @@ describe('the four onboarding screens', () => {
   it('PERSIST: screen 3 records position 3 and marks the third hairline', async () => {
     const { storage, data } = fakeStorage();
     const service = createOnboardingService(createKv(storage));
-    const onAdvance = jest.fn();
+    const onAdvance = vi.fn();
 
     const { getByLabelText, toJSON } = await render(
       <NightScreen service={service} onAdvance={onAdvance} />,
@@ -191,7 +191,7 @@ describe('the four onboarding screens', () => {
   it('COMPLETE: screen 4 records completion and makes the app reachable', async () => {
     const { storage, data } = fakeStorage();
     const service = createOnboardingService(createKv(storage));
-    const onAdvance = jest.fn();
+    const onAdvance = vi.fn();
 
     const { getByLabelText } = await render(
       <PermissionsScreen service={service} onAdvance={onAdvance} />,
@@ -211,7 +211,7 @@ describe('the four onboarding screens', () => {
       removeItem: () => Promise.resolve(),
     };
     const service = createOnboardingService(createKv(failing));
-    const onAdvance = jest.fn();
+    const onAdvance = vi.fn();
     Logger.__setSink(() => {});
 
     try {

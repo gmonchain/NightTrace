@@ -121,19 +121,19 @@ describe('SignatureStrip', () => {
     // animation the tile builds, and the loop mock observes the `start()`.
     //
     // `isReduceMotionEnabled` is replaced by assignment and restored by
-    // reference: it is already a `jest.fn` (the RN test mock), so
+    // reference: it is already a `vi.fn` (the RN test mock), so
     // `mockRestore()` would reset it to a no-op rather than to its default.
     const originalReduceMotion = AccessibilityInfo.isReduceMotionEnabled;
     Reflect.set(AccessibilityInfo, 'isReduceMotionEnabled', () =>
       Promise.resolve(false),
     );
-    const start = jest.fn();
-    const loop = jest.spyOn(Animated, 'loop').mockReturnValue({
+    const start = vi.fn();
+    const loop = vi.spyOn(Animated, 'loop').mockReturnValue({
       start,
       stop: () => {},
       reset: () => {},
     });
-    const timing = jest.spyOn(Animated, 'timing');
+    const timing = vi.spyOn(Animated, 'timing');
     try {
       await render(<SignatureStrip slots={['unidentified']} />);
       await waitFor(() => expect(timing).toHaveBeenCalledTimes(2));
@@ -172,8 +172,8 @@ describe('SignatureStrip', () => {
           resolveReduceMotion = resolve;
         }),
     );
-    const loop = jest.spyOn(Animated, 'loop');
-    const timing = jest.spyOn(Animated, 'timing');
+    const loop = vi.spyOn(Animated, 'loop');
+    const timing = vi.spyOn(Animated, 'timing');
     try {
       await render(<SignatureStrip slots={['unidentified']} />);
       await act(async () => {

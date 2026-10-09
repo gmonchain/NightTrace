@@ -68,7 +68,7 @@ Individually:
 ```sh
 npm run typecheck  # tsc --noEmit; strict + noUncheckedIndexedAccess + exactOptionalPropertyTypes + noImplicitOverride
 npm run lint       # ESLint boundary rules (AD-1 four-layer table, AD-12 SQL & route containment, AD-17 raw values, AD-30 console)
-npm test           # both Jest projects: `engine` on the node preset, `ui` on jest-expo
+npm test           # both Vitest projects: `engine` on the node environment, `ui` on vitest-expo
 npm run claims:check  # the claims lint (AD-16) over the declared string-surface set
 npm run bundle     # iOS export; fails on a route under src/app/** that cannot resolve
 ```
@@ -132,7 +132,7 @@ config.
 ## Gates
 
 `.github/workflows/ci.yml` runs `npm run verify`, and that entrypoint is where
-the gates run: the token-sync test (AD-17) is a `ui`-project Jest suite, so
+the gates run: the token-sync test (AD-17) is a `ui`-project Vitest suite, so
 `npm test` runs it; the AD-17 raw-value lint is defined in `eslint.config.js`
 and run by `npm run lint`; and Story 1.5's claims lint
 (`npm run claims:check`, AD-16 / NFR-18) is the last link of the `verify` chain.

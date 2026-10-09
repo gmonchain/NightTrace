@@ -28,7 +28,7 @@ describe('ProfileScreen', () => {
   });
 
   it('OPEN_ABOUT: the About row opens the notice', async () => {
-    const onOpenAbout = jest.fn();
+    const onOpenAbout = vi.fn();
     const { getByLabelText } = await render(
       <ProfileScreen onOpenAbout={onOpenAbout} />,
     );

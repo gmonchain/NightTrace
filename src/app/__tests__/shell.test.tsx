@@ -1,27 +1,28 @@
-import { renderRouter, screen, waitFor } from 'expo-router/testing-library';
+import { renderRouter, screen, waitFor } from 'vitest-expo/router';
 
 import { TAB_ROUTE_NAMES, TAB_ROUTES } from '@/features/shell/navigation';
 import { TAB_IDS } from '@/ui/components/TabBar';
+
+import { appRoutes } from './routes';
 
 /**
  * Story 1.8 — TAB_LIST: the shell holds exactly four tabs.
  *
  * The declaration half asserts the list directly from the primitive's `TAB_IDS`;
- * the rendered half mounts the real `src/app` tree at `/home` and asserts the
- * `TabBar` shows exactly the four tabs, in order, with no Equipment and no
- * Settings tab.
+ * the rendered half mounts the real `src/app` tree (the `appRoutes` context) at
+ * `/home` and asserts the `TabBar` shows exactly the four tabs, in order, with no
+ * Equipment and no Settings tab.
  */
 
 describe('the four-tab shell', () => {
   afterEach(() => {
     // `renderRouter` turns on fake timers; restore them afterwards (the
     // `index.test.tsx` convention).
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('renders exactly HOME · INVESTIGATE · FIELD JOURNAL · PROFILE, in order', async () => {
-    const router = renderRouter('./src/app', { initialUrl: '/home' });
-    await router;
+    const router = await renderRouter(appRoutes, { initialUrl: '/home' });
     await waitFor(() => expect(router.getPathname()).toBe('/home'));
 
     const tabs = screen.getAllByRole('tab');

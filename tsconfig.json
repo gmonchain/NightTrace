@@ -8,7 +8,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["jest", "node"]
+    "types": ["vitest-expo/types", "node"]
   },
   "include": [
     "**/*.ts",

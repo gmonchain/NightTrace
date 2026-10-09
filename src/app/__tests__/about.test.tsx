@@ -3,7 +3,7 @@ import {
   renderRouter,
   screen,
   waitFor,
-} from 'expo-router/testing-library';
+} from 'vitest-expo/router';
 
 import { ABOUT_NOTICE, ABOUT_NOTICE_COPY, PROFILE_COPY } from '@/data/strings';
 import { onboardingService } from '@/services/OnboardingService';
@@ -17,6 +17,8 @@ import {
   type HostElement,
 } from '@/ui/components/__tests__/tree';
 import { colors } from '@/ui/theme/tokens';
+
+import { appRoutes } from './routes';
 
 /**
  * Story 1.7 — the Profile→About path, exercised over the real route tree.
@@ -35,20 +37,17 @@ import { colors } from '@/ui/theme/tokens';
  * Reduce Motion keeps the panel presented at rest.
  */
 
-jest.mock('@/services/OnboardingService', () => {
-  const actual = jest.requireActual('@/services/OnboardingService');
-  return {
-    ...actual,
-    onboardingService: {
-      readOnboardingState: jest.fn(),
-      acknowledgeNotice: jest.fn(),
-      setStep: jest.fn(),
-      complete: jest.fn(),
-    },
-  };
-});
+vi.mock('@/services/OnboardingService', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/services/OnboardingService')>()),
+  onboardingService: {
+    readOnboardingState: vi.fn(),
+    acknowledgeNotice: vi.fn(),
+    setStep: vi.fn(),
+    complete: vi.fn(),
+  },
+}));
 
-const service = jest.mocked(onboardingService);
+const service = vi.mocked(onboardingService);
 
 const SAFETY_PARAGRAPH =
   ABOUT_NOTICE.sections.find((section) => section.heading === 'SAFETY')
@@ -88,7 +87,7 @@ describe('the Profile-to-About path over the real route tree', () => {
   let restoreReduceMotion: () => void;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     timing = spyOnTiming();
     // Reduce Motion keeps the `Sheet` presented at rest instead of scheduling an
     // entrance, so the sheet's own effect does not interleave with the router's.
@@ -104,7 +103,7 @@ describe('the Profile-to-About path over the real route tree', () => {
     restoreReduceMotion();
     // `renderRouter` turns on fake timers; restore them so the next test's
     // render and effects settle on real timers (the `index.test.tsx` convention).
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('presents the notice inside the Sheet surface (panel, scrim and grabber)', async () => {
@@ -112,8 +111,7 @@ describe('the Profile-to-About path over the real route tree', () => {
     // file: the harness's module-global router store is not reset between
     // renders, so a second *press-navigation* render would have its effects
     // swallowed (the `index.test.tsx` convention).
-    const router = renderRouter('./src/app', { initialUrl: '/about' });
-    await router;
+    await renderRouter(appRoutes, { initialUrl: '/about' });
     await waitFor(() =>
       expect(screen.getByText(ABOUT_NOTICE.title)).toBeTruthy(),
     );
@@ -139,8 +137,7 @@ describe('the Profile-to-About path over the real route tree', () => {
   });
 
   it('OPEN_ABOUT then CLOSE_ABOUT: the notice opens from Profile and closes back to it', async () => {
-    const router = renderRouter('./src/app', { initialUrl: '/profile' });
-    await router;
+    const router = await renderRouter(appRoutes, { initialUrl: '/profile' });
 
     await waitFor(() =>
       expect(screen.getByText(PROFILE_COPY.aboutRowLabel)).toBeTruthy(),

@@ -1,5 +1,6 @@
 import { AccessibilityInfo, Animated } from 'react-native';
 import type { JsonElement, JsonNode } from 'test-renderer';
+import type { MockInstance } from 'vitest';
 
 /**
  * Host-tree helpers for the document-primitive suites.
@@ -15,18 +16,48 @@ import type { JsonElement, JsonNode } from 'test-renderer';
 
 export type HostElement = JsonElement;
 
+/**
+ * The familiar host name for a rendered element, so a suite can say "the Text"
+ * and "the View" rather than reaching for a per-runner identifier. `test-renderer`
+ * reports the React Native host component names (`RCTText`, `RCTView`,
+ * `RCTImageView`), while the suites — like React Native Testing Library's own
+ * `isHostText`/`isHostImage` — are written against the friendly form. The
+ * alias table spells out the pairs that are not a simple prefix strip (an image
+ * is `Image`, not `ImageView`); anything else drops a leading `RCT`, and
+ * non-`RCT` hosts — react-native-svg's `RNSVG*` elements, and anything else a
+ * library registers — are unchanged, because those names are already public.
+ */
+const HOST_NAME_ALIASES: Record<string, string> = {
+  RCTText: 'Text',
+  RCTVirtualText: 'Text',
+  RCTView: 'View',
+  RCTImageView: 'Image',
+};
+
+export function hostName(type: unknown): string {
+  const name = typeof type === 'string' ? type : String(type);
+  return HOST_NAME_ALIASES[name] ?? (name.startsWith('RCT') ? name.slice(3) : name);
+}
+
 /** A host element is any JSON node that is not a text node. */
 export function isElement(node: JsonNode): node is JsonElement {
   return typeof node !== 'string';
 }
 
-/** Every host element in `node`, depth-first, the given node included. */
+/**
+ * Every host element in `node`, depth-first, the given node included — with each
+ * element's `type` normalized to its familiar host name (see `hostName`) *in
+ * place*, so the walked elements stay the very objects `toJSON()` produced and a
+ * suite asserting child identity (`children.indexOf`) still compares correctly. A
+ * predicate then says `'Text'` rather than the runner's raw identifier.
+ */
 export function flatten(node: JsonNode | null): readonly HostElement[] {
   const found: HostElement[] = [];
   const visit = (current: JsonNode): void => {
     if (typeof current === 'string') {
       return;
     }
+    Reflect.set(current, 'type', hostName(current.type));
     found.push(current);
     for (const child of current.children) {
       visit(child);
@@ -75,22 +106,44 @@ export function propStrings(value: unknown): readonly string[] {
   return [];
 }
 
-/** The style objects an element carries, flattened and with falsy slots dropped. */
+/**
+ * The style objects an element carries, flattened and with falsy slots dropped.
+ *
+ * React Native accepts a style as an object, or an arbitrarily nested array of
+ * objects and falsy slots. The runner surfaces the array as written, so this
+ * walks it recursively rather than taking only the top level — a nested
+ * `[base, [override]]` would otherwise hide the override from `mergedStyle`.
+ */
 export function styleProps(node: HostElement): readonly Record<string, unknown>[] {
-  const style = node.props.style;
-  if (style === undefined || style === null) {
-    return [];
-  }
-  const entries = Array.isArray(style) ? style : [style];
-  return entries.filter(
-    (entry): entry is Record<string, unknown> =>
-      typeof entry === 'object' && entry !== null,
-  );
+  const collect = (value: unknown): Record<string, unknown>[] => {
+    if (Array.isArray(value)) {
+      return value.flatMap((entry) => collect(entry));
+    }
+    return typeof value === 'object' && value !== null
+      ? [value as Record<string, unknown>]
+      : [];
+  };
+  return collect(node.props.style);
 }
 
-/** An element's style objects merged into one, so an expectation can read across them. */
+/**
+ * An element's style objects merged into one, so an expectation can read across them.
+ *
+ * React Native's `Text` stringifies a numeric `fontWeight` on the host — its own
+ * `Text.js` coerces `400` to `'400'` before handing the style down — while the
+ * design tokens spell the weight as a number. A suite asserting the token
+ * (`typography.meta.fontWeight`) against the rendered text would then compare
+ * `400` to `'400'`. The weight is restored to its numeric form here, so a suite
+ * compares the weight the token declared rather than the wire spelling RN chose;
+ * a non-numeric weight (`'normal'`, `'bold'`) is left as written.
+ */
 export function mergedStyle(node: HostElement): Record<string, unknown> {
-  return Object.assign({}, ...styleProps(node));
+  const merged = Object.assign({}, ...styleProps(node));
+  const weight = merged.fontWeight;
+  if (typeof weight === 'string' && weight.trim() !== '' && !Number.isNaN(Number(weight))) {
+    merged.fontWeight = Number(weight);
+  }
+  return merged;
 }
 
 /**
@@ -166,14 +219,14 @@ export function setReduceMotion(value: boolean): () => void {
  * it was given.
  */
 export function spyOnTiming(): {
-  readonly timing: jest.SpyInstance;
+  readonly timing: MockInstance<typeof Animated.timing>;
   readonly configs: () => readonly TimingConfig[];
   readonly lastCallback: () => TimingStartCallback | null;
   readonly stopCount: () => number;
 } {
   let callback: TimingStartCallback | null = null;
   let stops = 0;
-  const timing = jest.spyOn(Animated, 'timing').mockImplementation(() => ({
+  const timing = vi.spyOn(Animated, 'timing').mockImplementation(() => ({
     start: (started?: TimingStartCallback) => {
       callback = started ?? null;
     },

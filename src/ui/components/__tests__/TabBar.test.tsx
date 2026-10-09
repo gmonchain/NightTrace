@@ -89,7 +89,7 @@ describe('TabBar', () => {
   });
 
   it('announces the selected state and reports the chosen tab', async () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     const { getByLabelText, toJSON } = await renderTabBar('HOME', onSelect);
     const root = rootOf(toJSON());
     const home = tabSubtree(root, 'HOME');
@@ -115,7 +115,7 @@ describe('TabBar', () => {
   });
 
   it('does not select the already-active tab', async () => {
-    const onSelect = jest.fn();
+    const onSelect = vi.fn();
     const { getByLabelText } = await renderTabBar('HOME', onSelect);
     // Re-selecting the active tab is a no-op.
     await fireEvent(getByLabelText('HOME'), 'press');

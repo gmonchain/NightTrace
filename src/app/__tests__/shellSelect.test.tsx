@@ -1,4 +1,6 @@
-import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
+import { fireEvent, renderRouter, screen, waitFor } from 'vitest-expo/router';
+
+import { appRoutes } from './routes';
 
 /**
  * Story 1.8 — TAB_SELECT: tapping a non-active tab activates its route; a
@@ -12,12 +14,11 @@ import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-li
 describe('selecting a tab', () => {
   afterEach(() => {
     // `renderRouter` turns on fake timers; restore them afterwards.
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('moves to the tapped tab and ignores a re-tap of the active tab', async () => {
-    const router = renderRouter('./src/app', { initialUrl: '/home' });
-    await router;
+    const router = await renderRouter(appRoutes, { initialUrl: '/home' });
     await waitFor(() => expect(router.getPathname()).toBe('/home'));
 
     fireEvent.press(screen.getByLabelText('INVESTIGATE'));

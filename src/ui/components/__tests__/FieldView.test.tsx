@@ -137,8 +137,8 @@ describe('FieldView', () => {
 
   it('starts the loop with the token halves', async () => {
     const restore = setReduceMotion(false);
-    const start = jest.fn();
-    const loop = jest.spyOn(Animated, 'loop').mockReturnValue({
+    const start = vi.fn();
+    const loop = vi.spyOn(Animated, 'loop').mockReturnValue({
       start,
       stop: () => {},
       reset: () => {},
@@ -164,7 +164,7 @@ describe('FieldView', () => {
 
   it('FIELD_REDUCED_MOTION: the rings sit static and no loop runs', async () => {
     const restore = setReduceMotion(true);
-    const loop = jest.spyOn(Animated, 'loop');
+    const loop = vi.spyOn(Animated, 'loop');
     const spy = spyOnTiming();
     try {
       const { toJSON } = await render(<FieldView state="QUIET" />);
