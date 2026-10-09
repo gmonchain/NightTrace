@@ -5,8 +5,8 @@
  * `scripts/claims/config.json`, and every file here must appear in that set
  * (Story 1.5's coverage test fails when a new table is added without it). The
  * barrel is the one import surface later stories read: the shared entertainment
- * line, the About notice table Story 1.7 renders and exports, and Story 1.6's
- * four onboarding screens' copy.
+ * line, the About notice table Story 1.7 renders and exports, Story 1.6's four
+ * onboarding screens' copy, and Story 2.1's conditions-board words.
  */
 export { ENTERTAINMENT_LINE } from './entertainment';
 export {
@@ -31,3 +31,4 @@ export {
   type AboutCopy,
   type ProfileCopy,
 } from './profile';
+export { PLACE_READOUTS, SKY_READOUTS } from './conditions';

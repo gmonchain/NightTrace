@@ -11,10 +11,7 @@
  * here. This module mints ids for user data only.
  */
 
-declare const brand: unique symbol;
-
-/** A nominal type over a runtime primitive. */
-export type Brand<T, B extends string> = T & { readonly [brand]: B };
+import type { Brand } from '@/engine/models/brand';
 
 export type SessionId = Brand<string, 'SessionId'>;
 export type CaseId = Brand<string, 'CaseId'>;

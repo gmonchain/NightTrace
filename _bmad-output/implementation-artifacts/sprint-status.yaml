@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-06-2026 11:39
-last_updated: 10-09-2026 09:20
+last_updated: 10-09-2026 22:15
 project: NightTrace
 project_key: NOKEY
 tracking_system: file-system
@@ -46,8 +46,8 @@ development_status:
   1-8-the-four-tab-shell-exists-and-holds-exactly-four-tabs: done
   epic-1-retrospective: optional
 
-  epic-2: backlog
-  2-1-the-same-seed-always-produces-the-same-session: backlog
+  epic-2: in-progress
+  2-1-the-same-seed-always-produces-the-same-session: done
   2-2-emissions-can-be-replayed-but-cannot-be-learned: backlog
   2-3-the-session-advances-through-a-phase-ladder-while-a-hidden-t: backlog
   2-4-every-sensor-channel-reports-its-own-state-and-none-of-them: backlog

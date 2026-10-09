@@ -95,6 +95,11 @@
       "kind": "ui-string-table"
     },
     {
+      "key": "ui.conditions-copy",
+      "path": "src/data/strings/conditions.ts",
+      "kind": "ui-string-table"
+    },
+    {
       "key": "native.ios-purpose-strings",
       "path": "app.config.ts",
       "kind": "ios-purpose-string"
