@@ -1,5 +1,5 @@
 import { createInvestigationEngine } from '@/engine/InvestigationEngine';
-import { sessionMs, tickIndex } from '@/engine/models';
+import { sessionMs, tickIndex, unit } from '@/engine/models';
 import { createRandomEngine, seedFromParts } from '@/engine/RandomEngine';
 
 import { sessionSeedFixture, engineContentFixture } from './fixtures';
@@ -36,9 +36,11 @@ describe('engine project runtime', () => {
     const first = engine.tick({
       tickIndex: tickIndex(0),
       elapsedMs: sessionMs(0),
-      phase: 'QUIET',
+      movement: unit(0),
+      sensorAnomaly: unit(0),
     });
     expect(first.state.status).toBe('running');
-    expect(first.emissions).toHaveLength(1);
+    // The lifecycle notice and the engine's opening phase.
+    expect(first.emissions).toHaveLength(2);
   });
 });

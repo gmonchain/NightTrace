@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-06-2026 11:39
-last_updated: 10-10-2026 08:30
+last_updated: 10-10-2026 13:30
 project: NightTrace
 project_key: NOKEY
 tracking_system: file-system
@@ -49,7 +49,7 @@ development_status:
   epic-2: in-progress
   2-1-the-same-seed-always-produces-the-same-session: done
   2-2-emissions-can-be-replayed-but-cannot-be-learned: done
-  2-3-the-session-advances-through-a-phase-ladder-while-a-hidden-t: backlog
+  2-3-the-session-advances-through-a-phase-ladder-while-a-hidden-t: done
   2-4-every-sensor-channel-reports-its-own-state-and-none-of-them: backlog
   2-5-the-database-persists-what-matters-and-can-recompute-what-do: backlog
   2-6-the-brief-prepares-the-user-and-the-place-before-anything-be: backlog

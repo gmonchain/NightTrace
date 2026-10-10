@@ -3,22 +3,22 @@
  * both fold the engine through.
  *
  * AD-3 makes replay an **audit property with no user-facing feature**: a session
- * is reconstructible from `seed + hunt + content version + a tick log`. Story
- * 2.3 owns the real phase transition machine; until then the host supplies a
- * time-based phase schedule, and this module is the one place that folds a
- * `SessionSeed` and an `EngineContent` bundle through the engine on a schedule.
+ * is reconstructible from `seed + hunt + content version + a tick log`. Story 2.2
+ * drove the replay on a host-supplied phase schedule; Story 2.3 deletes that
+ * schedule — the engine **owns its own ladder** now (`rules/phases.ts`), so this
+ * module only folds a `SessionSeed` and an `EngineContent` bundle through the
+ * engine and returns the emissions the ladder produced.
  *
  * It is pure — no clock, no I/O, no framework (AD-1) — so the CI gate
- * (`scripts/golden-seed.mjs`) and the engine test project run the identical
- * fold. Nothing here interprets an emission; it only returns them.
+ * (`scripts/golden-seed.mjs`) and the engine test project run the identical fold.
+ * Nothing here interprets an emission; it only returns them.
  */
 
 import type {
   Emission,
   EngineContent,
-  SessionPhase,
-  SessionSeed,
   SeedParts,
+  SessionSeed,
 } from './models';
 import {
   contentVersion,
@@ -31,43 +31,21 @@ import {
 } from './models';
 import { createInvestigationEngine } from './InvestigationEngine';
 
-/** One span of the host's phase schedule: the phase in force until `untilMs`. */
-export interface PhaseSpan {
-  readonly phase: SessionPhase;
-  readonly untilMs: number;
-}
+/** The tick rate a replay is recorded and folded at (the engine contract §I.6). */
+export const DEFAULT_REPLAY_TICK_MS = 1_000;
 
-/** A host schedule: how long a session runs, how often it ticks, its phases. */
-export interface ReplaySchedule {
-  readonly tickMs: number;
+/** How a replay runs: for how long, and at what tick rate. */
+export interface ReplayOptions {
   readonly durationMs: number;
-  /** Contiguous spans covering `[0, durationMs]`; the last spans to the end. */
-  readonly spans: readonly PhaseSpan[];
+  readonly tickMs: number;
 }
 
-/** The fraction of a session each phase occupies, in order (Story 2.2's stub). */
-const PHASE_FRACTIONS: readonly (readonly [SessionPhase, number])[] = [
-  ['QUIET', 0.15],
-  ['SIGNALS', 0.4],
-  ['ACTIVITY', 0.7],
-  ['ENCOUNTER_WINDOW', 0.85],
-  ['RESOLUTION', 1.0],
-];
-
-/**
- * The time-based phase schedule Story 2.2's sweep and gate drive. Story 2.3
- * replaces this with the real transition machine; the schedule is a *host*
- * input to the engine, never a transition the engine computes itself.
- */
-export function defaultPhaseSchedule(durationMs: number): ReplaySchedule {
-  return {
-    tickMs: 1_000,
-    durationMs,
-    spans: PHASE_FRACTIONS.map(([phase, fraction]) => ({
-      phase,
-      untilMs: Math.round(fraction * durationMs),
-    })),
-  };
+/** The default replay window for a given duration. */
+export function replayOptions(
+  durationMs: number,
+  tickMs: number = DEFAULT_REPLAY_TICK_MS,
+): ReplayOptions {
+  return { durationMs, tickMs };
 }
 
 /** The identity a replay pins: the seed, the hunt and the content version. */
@@ -111,37 +89,31 @@ export function replaySessionSeed(identity: ReplayIdentity): SessionSeed {
   };
 }
 
-/** The phase in force at `elapsedMs`, per a schedule. The last span closes. */
-export function phaseAt(schedule: ReplaySchedule, elapsedMs: number): SessionPhase {
-  for (const span of schedule.spans) {
-    if (elapsedMs < span.untilMs) {
-      return span.phase;
-    }
-  }
-  const last = schedule.spans[schedule.spans.length - 1];
-  if (last === undefined) {
-    throw new Error('phaseAt: the schedule has no spans');
-  }
-  return last.phase;
-}
-
 /**
- * Fold a session through the engine on a schedule and return every emission, in
- * order. The fold is deterministic in `(session.seed, content, schedule)`.
+ * Fold a session through the engine and return every emission, in order.
+ *
+ * The engine computes its own phase ladder — the host supplies only time and the
+ * two tension drivers, both `unit(0)` here (the sensor hub is Story 2.4). The
+ * fold is deterministic in `(session.seed, content, options)`.
  */
 export function replaySession(
   session: SessionSeed,
   content: EngineContent,
-  schedule: ReplaySchedule,
+  options: ReplayOptions,
 ): readonly Emission[] {
   const engine = createInvestigationEngine(session, { content });
   const emissions: Emission[] = [];
   let tick = 0;
-  for (let elapsed = 0; elapsed <= schedule.durationMs; elapsed += schedule.tickMs) {
+  for (
+    let elapsed = 0;
+    elapsed <= options.durationMs;
+    elapsed += options.tickMs
+  ) {
     const result = engine.tick({
       tickIndex: tickIndex(tick),
       elapsedMs: sessionMs(elapsed),
-      phase: phaseAt(schedule, elapsed),
+      movement: unit(0),
+      sensorAnomaly: unit(0),
     });
     emissions.push(...result.emissions);
     tick += 1;

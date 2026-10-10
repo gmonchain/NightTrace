@@ -94,5 +94,5 @@ export interface EventTable {
 
 /** A type guard over the closed category set — the way a JSON boundary proves one. */
 export function isEventCategory(value: string): value is EventCategory {
-  return (EVENT_CATEGORIES as readonly string[]).includes(value);
+  return EVENT_CATEGORIES.some((category) => category === value);
 }

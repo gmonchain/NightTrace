@@ -42,9 +42,13 @@ import {
 } from '../theme/tokens';
 import { textStyle } from '../theme/type';
 import { DECORATIVE } from './a11y';
+import { SESSION_STATE_WORDS } from '../../engine/models';
 
-/** The four session state words — a closed union. */
-export const FIELD_STATES = ['QUIET', 'LISTENING', 'ACTIVE', 'CONTACT'] as const;
+/**
+ * The four session state words — the **engine's** closed union, aliased here so
+ * the design primitive and the session ladder can never drift apart (AD-25).
+ */
+export const FIELD_STATES = SESSION_STATE_WORDS;
 
 export type FieldState = (typeof FIELD_STATES)[number];
 

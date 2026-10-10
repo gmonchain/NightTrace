@@ -64,6 +64,13 @@ function serialize(emission) {
         text: emission.text,
         atMs: emission.atMs,
       };
+    case 'phase':
+      return {
+        kind: 'phase',
+        phase: emission.phase,
+        stateWord: emission.stateWord,
+        atMs: emission.atMs,
+      };
     default:
       throw new Error(`golden-seed: unknown emission kind ${emission.kind}`);
   }
@@ -112,17 +119,22 @@ async function main() {
       huntId: identity.huntId,
       contentVersion: identity.contentVersion ?? CONTENT_VERSION,
     });
-    const schedule = replay.defaultPhaseSchedule(identity.durationMs);
+    // Story 2.3: the engine computes its own phase ladder, so the replay takes a
+    // plain window (duration + tick rate) rather than a host phase schedule.
+    const options = {
+      durationMs: identity.durationMs,
+      tickMs: identity.tickMs ?? replay.DEFAULT_REPLAY_TICK_MS,
+    };
     const emissionSequence = replay
-      .replaySession(session, content.CONTENT, schedule)
+      .replaySession(session, content.CONTENT, options)
       .map(serialize);
 
     const next = {
       seed: identity.seed,
       huntId: identity.huntId,
       contentVersion: identity.contentVersion ?? CONTENT_VERSION,
-      tickMs: schedule.tickMs,
-      durationMs: schedule.durationMs,
+      tickMs: options.tickMs,
+      durationMs: options.durationMs,
       expected: emissionSequence,
     };
 

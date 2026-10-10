@@ -12,8 +12,8 @@
  * order), so it survives a `TickResult` deep-equality replay comparison.
  */
 
-import type { EventDefinitionId, SessionMs } from '../models';
-import type { EventDefinition } from '../models';
+import type { EventDefinition, EventDefinitionId, SessionMs } from '../models';
+import { sessionMs } from '../models';
 
 /**
  * The engine's **content-independent** minimum per-event cooldown. Content may
@@ -102,13 +102,12 @@ export function recordEmission(
   definition: EventDefinition,
   atMs: SessionMs,
 ): CooldownLedger {
-  const floorMs = Math.max(
-    ENGINE_MIN_EVENT_COOLDOWN_MS,
-    Math.max(0, definition.cooldownMs),
-  ) as SessionMs;
+  const floorMs = sessionMs(
+    Math.max(ENGINE_MIN_EVENT_COOLDOWN_MS, Math.max(0, definition.cooldownMs)),
+  );
   const next: CooldownRecord = {
     definitionId: definition.id,
-    untilMs: (atMs + floorMs) as SessionMs,
+    untilMs: sessionMs(atMs + floorMs),
     floorMs,
   };
   const cooldowns = [

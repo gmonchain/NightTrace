@@ -1,9 +1,10 @@
+import { assertNever } from '@/engine/models';
 import {
   DIRECTIVE_MAX_PER_SESSION,
   DIRECTIVE_MIN_SPACING_MS,
 } from '@/engine/directives/DirectiveScheduler';
 import { createRandomEngine, seedFromParts } from '@/engine/RandomEngine';
-import { replaySession, replaySessionSeed, defaultPhaseSchedule } from '@/engine/replay';
+import { replayOptions, replaySession, replaySessionSeed } from '@/engine/replay';
 import { ENGINE_MIN_EVENT_COOLDOWN_MS } from '@/engine/rules/cooldown';
 import { gapFrom } from '@/engine/rules/silence';
 
@@ -53,7 +54,7 @@ type SweepMetrics = {
 };
 
 function sweep(): SweepMetrics {
-  const schedule = defaultPhaseSchedule(TWENTY_MINUTES_MS);
+  const options = replayOptions(TWENTY_MINUTES_MS);
   const intervals: number[] = [];
   const longestSilences: number[] = [];
   const eventCounts: number[] = [];
@@ -67,15 +68,26 @@ function sweep(): SweepMetrics {
       huntId: HUNT_ID,
       contentVersion: CONTENT_VERSION,
     });
-    const emissions = replaySession(session, CONTENT, schedule);
+    const emissions = replaySession(session, CONTENT, options);
 
     const events: number[] = [];
     const directives: number[] = [];
     for (const emission of emissions) {
-      if (emission.kind === 'event') {
-        events.push(emission.atMs);
-      } else if (emission.kind === 'directive') {
-        directives.push(emission.atMs);
+      switch (emission.kind) {
+        case 'event':
+          events.push(emission.atMs);
+          break;
+        case 'directive':
+          directives.push(emission.atMs);
+          break;
+        case 'phase':
+        case 'notice':
+          // The ladder and the lifecycle notices are not signals; only `event`
+          // and `directive` are measured here.
+          break;
+        default:
+          // A new emission variant must be decided here, never silently dropped.
+          assertNever(emission);
       }
     }
 

@@ -10,6 +10,7 @@ export * from './brand';
 export * from './ids';
 export * from './seed';
 export * from './phase';
+export * from './digest';
 export * from './event';
 export * from './directive';
 export * from './content';

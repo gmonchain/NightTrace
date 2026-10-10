@@ -13,6 +13,7 @@
 
 import type { EventCategory } from './event';
 import type { DirectiveId, EventDefinitionId, SessionMs, Unit } from './ids';
+import type { SessionPhase, SessionStateWord } from './phase';
 
 /** The lifecycle notice codes this story can emit. The union grows per story. */
 export type EngineNotice = 'session_started' | 'session_ended';
@@ -51,8 +52,29 @@ export interface DirectiveEmission {
   readonly atMs: SessionMs;
 }
 
+/**
+ * The `phase` variant — a phase change the engine computed itself (Story 2.3).
+ *
+ * It carries the engine phase that came into force and the **user-visible state
+ * word** derived from it, so the presenter can render the one vocabulary the
+ * user is allowed to see without re-implementing the mapping. It carries **no
+ * tension**: tension is hidden (AD-26) and the phase change is the only signal
+ * the user gets that time passing means something.
+ */
+export interface PhaseEmission {
+  readonly kind: 'phase';
+  readonly phase: SessionPhase;
+  /** The four-word ladder's value for `phase` (AD-25) — never `phase` itself. */
+  readonly stateWord: SessionStateWord;
+  readonly atMs: SessionMs;
+}
+
 /** The complete output union. Grows one variant per story. */
-export type Emission = NoticeEmission | EventEmission | DirectiveEmission;
+export type Emission =
+  | NoticeEmission
+  | EventEmission
+  | DirectiveEmission
+  | PhaseEmission;
 
 /**
  * The exhaustiveness gate. A consumer's `switch` ends `default:

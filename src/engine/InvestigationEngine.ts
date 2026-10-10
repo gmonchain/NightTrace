@@ -8,18 +8,19 @@
  * for the directive scheduler — **once, at construction**. `tick(input)` is a
  * fold over immutable state: it returns a **new** `SimulationState`, never
  * mutating the one it was given, and never reads a wall clock — the host
- * supplies `SessionMs`, `TickIndex` and the active `SessionPhase` on every
- * `TickInput`.
+ * supplies `SessionMs`, `TickIndex` and the tick's drivers.
  *
- * Story 2.1 landed the shape and the determinism guarantees; Story 2.2 makes the
- * engine *emit*. `tick` now runs the directive scheduler (`rng.session`) and the
- * event scheduler (`rng.events`) and returns their `event` / `directive`
- * emissions alongside the lifecycle `notice`s. The content the schedulers read
- * (definitions, tables, directives) arrives as a `deps` argument, because the
- * engine may not import `src/data/**` (AD-1). `TickResult.rng` is now the
- * `rng.events` snapshot — the stream that actually drives emissions — so a replay
- * comparison detects a divergence in the draw sequence, not merely in generator
- * identity.
+ * Story 2.1 landed the shape and the determinism guarantees; Story 2.2 made the
+ * engine *emit*; Story 2.3 gives the session a **shape**. `tick` now computes the
+ * **hidden tension** (`rules/tension.ts`) and, from it, the **phase ladder**
+ * (`rules/phases.ts`) — the host no longer supplies the phase. A phase change
+ * emits the `phase` variant carrying the user-visible state word, and every tick
+ * appends its outcome to the run-length-encoded digest (`models/digest.ts`).
+ * `TickInput` carries the two tension drivers the host owns (`movement` and
+ * `sensorAnomaly`), both `unit(0)` until the sensor hub of Story 2.4 and the user
+ * actions of Epic 4. The content the schedulers read (definitions, tables,
+ * directives) still arrives as a `deps` argument, because the engine may not
+ * import `src/data/**` (AD-1).
  */
 
 import { invariant } from '@/util/result';
@@ -39,6 +40,7 @@ import type { EventScheduler, SchedulerState } from './EventScheduler';
 import { createRandomEngine } from './RandomEngine';
 import type { RandomState } from './RandomEngine';
 import type {
+  DigestSegment,
   Emission,
   EngineContent,
   EngineNotice,
@@ -50,9 +52,14 @@ import type {
   SessionMs,
   SessionPhase,
   SessionSeed,
+  SessionStateWord,
+  TickDigest,
   TickIndex,
+  Unit,
 } from './models';
-import { sessionMs } from './models';
+import { SESSION_TERMINAL_PHASE, appendDigest, sessionMs, stateWordFor } from './models';
+import { advancePhase } from './rules/phases';
+import { updateTension } from './rules/tension';
 
 /** Why a session ended. `finish` records one of these; the seal rules arrive in 2.5. */
 export type SessionEndReason =
@@ -88,8 +95,17 @@ export interface SimulationState {
   /** The host's elapsed session time; `null` before the first tick. */
   readonly elapsedMs: SessionMs | null;
   readonly endReason: SessionEndReason | null;
-  /** The active phase the host supplied; `null` before the first tick. */
+  /** The engine's own phase; `null` before the first tick. Story 2.3 computes it. */
   readonly phase: SessionPhase | null;
+  /** The user-visible word for `phase`; `null` before the first tick (AD-25). */
+  readonly stateWord: SessionStateWord | null;
+  /** The hidden `0..100` tension (AD-26) — never emitted, never rendered. */
+  readonly tension: number;
+  /**
+   * The run-length-encoded tick digest so far — the replay key's record of each
+   * tick's phase, never one entry per tick (AD-3, §I.6).
+   */
+  readonly digest: readonly DigestSegment[];
   /** The engine-held cooldown / anti-repeat state (FR-2). */
   readonly scheduler: SchedulerState;
   /** The engine-held directive cadence state (AD-6). */
@@ -97,13 +113,18 @@ export interface SimulationState {
 }
 
 /**
- * Everything one tick receives. The host supplies time **and the active phase**;
- * the engine reads no clock and computes no transition (Story 2.3 owns that).
+ * Everything one tick receives. The host supplies time and the two tension
+ * drivers — **not the phase**: the engine computes its own ladder (Story 2.3).
+ * `movement` and `sensorAnomaly` are `unit(0)` until the sensor hub (2.4) and
+ * the user actions (Epic 4) supply them.
  */
 export interface TickInput {
   readonly tickIndex: TickIndex;
   readonly elapsedMs: SessionMs;
-  readonly phase: SessionPhase;
+  /** `0..1` movement from the sensor hub; `unit(0)` until Story 2.4. */
+  readonly movement: Unit;
+  /** `0..1` sensor anomaly; `unit(0)` until Story 2.4. */
+  readonly sensorAnomaly: Unit;
 }
 
 export interface TickResult {
@@ -112,6 +133,8 @@ export interface TickResult {
   readonly emissions: readonly Emission[];
   /** The post-tick `rng.events` snapshot — the stream that drove emissions. */
   readonly rng: RandomState;
+  /** This tick's digest value: the phase it ran in, or the terminal `ENDED`. */
+  readonly digest: TickDigest;
 }
 
 export interface InvestigationEngine {
@@ -184,6 +207,9 @@ export function createInvestigationEngine(
     elapsedMs: null,
     endReason: null,
     phase: null,
+    stateWord: null,
+    tension: 0,
+    digest: [],
     scheduler: schedulerState,
     directive: directiveState,
   };
@@ -199,7 +225,22 @@ export function createInvestigationEngine(
         'InvestigationEngine.tick: the session has already ended',
       );
       const first = state.status === 'ready';
+      const elapsedDeltaMs = sessionMs(
+        state.elapsedMs === null ? 0 : input.elapsedMs - state.elapsedMs,
+      );
 
+      // 1. Advance the ladder from the tension computed last tick. Tension leads
+      //    the phase by one tick because this tick's emission — a tension driver
+      //    — is only known once the scheduler has run.
+      const previousPhase = state.phase ?? 'QUIET';
+      const phase = advancePhase(previousPhase, {
+        elapsedMs: input.elapsedMs,
+        tension: state.tension,
+      });
+      const stateWord = stateWordFor(phase);
+      const phaseChanged = state.phase !== phase;
+
+      // 2. The directive cadence (which may narrow the event space this tick).
       const directiveStep = directiveScheduler.step(
         directiveState,
         { elapsedMs: input.elapsedMs },
@@ -207,34 +248,57 @@ export function createInvestigationEngine(
       );
       directiveState = directiveStep.state;
 
+      // 3. The event scheduler, keyed off the phase now in force.
       const schedulerStep = scheduler.step(
         schedulerState,
         {
           elapsedMs: input.elapsedMs,
-          phase: input.phase,
+          phase,
           directive: directiveState.active,
         },
         eventRng,
       );
       schedulerState = schedulerStep.state;
 
+      // 4. Tension: elapsed, movement, sensor anomaly and this tick's emission.
+      const emitted = schedulerStep.emissions.some(
+        (emission) => emission.kind === 'event',
+      );
+      const tension = updateTension(state.tension, {
+        elapsedDeltaMs,
+        movement: input.movement,
+        sensorAnomaly: input.sensorAnomaly,
+        emitted,
+      });
+
+      // 5. Record this tick's outcome in the RLE digest — never one entry per tick.
+      const digest = appendDigest(state.digest, phase);
+
+      const phaseEmission: Emission | null = phaseChanged
+        ? { kind: 'phase', phase, stateWord, atMs: input.elapsedMs }
+        : null;
+
       state = {
         ...state,
         status: 'running',
         tickIndex: input.tickIndex,
         elapsedMs: input.elapsedMs,
-        phase: input.phase,
+        phase,
+        stateWord,
+        tension,
+        digest,
         scheduler: schedulerState,
         directive: directiveState,
       };
 
       const emissions: Emission[] = [
         ...(first ? [notice('session_started')] : []),
+        ...(phaseEmission === null ? [] : [phaseEmission]),
         ...directiveStep.emissions,
         ...schedulerStep.emissions,
       ];
 
-      return { state, emissions, rng: eventRng.snapshot() };
+      return { state, emissions, rng: eventRng.snapshot(), digest: phase };
     },
 
     finish(reason: SessionEndReason): TickResult {
@@ -242,15 +306,19 @@ export function createInvestigationEngine(
         state.status !== 'ended',
         'InvestigationEngine.finish: the session has already ended',
       );
+      // `ENDED` is the terminal marker, not a phase: it is recorded in the digest
+      // and on `status`, never as a `SessionPhase`.
       state = {
         ...state,
         status: 'ended',
         endReason: reason,
+        digest: appendDigest(state.digest, SESSION_TERMINAL_PHASE),
       };
       return {
         state,
         emissions: [notice('session_ended')],
         rng: eventRng.snapshot(),
+        digest: SESSION_TERMINAL_PHASE,
       };
     },
   };

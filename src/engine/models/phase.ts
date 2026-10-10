@@ -1,19 +1,20 @@
 /**
- * The closed session-phase vocabulary (AD-25) — Story 2.2's share of it.
+ * The closed session-phase vocabulary and the separate user-visible ladder
+ * (AD-25).
  *
  * The engine's phase ladder is **closed at five** — `QUIET` → `SIGNALS` →
  * `ACTIVITY` → `ENCOUNTER_WINDOW` → `RESOLUTION` — followed by a terminal
  * `ENDED` marker that is **not** a phase and is not counted in the run-length
- * replay digest (AD-3). The user-visible four-word ladder (`QUIET` →
- * `LISTENING` → `ACTIVE` → `CONTACT`) is a separate vocabulary and belongs to
- * Story 2.3.
+ * replay digest (AD-3). The user-visible state is a **separate four-word ladder**
+ * (`QUIET` → `LISTENING` → `ACTIVE` → `CONTACT`), rendered as a hairline; the
+ * user is never told what either means (AD-25, AD-27).
  *
- * Story 2.2 defines the *vocabulary* only. The transition machine, the tension
- * gates that decide when a phase gives way to the next, and the user-visible
- * ladder are all Story 2.3 — so the phase is an **input** here (`TickInput.phase`),
- * supplied by the host, and the scheduler keys its event table off it. Nothing
- * defined in this file is discarded when 2.3 computes the phase for real; it is
- * the vocabulary 2.3 fills.
+ * Story 2.2 defined the five-phase vocabulary and the terminal marker; 2.3 adds
+ * the four-word ladder, `stateWordFor` — the one explicit mapping between the two
+ * — and hands the transition machine to `rules/phases.ts`. The two ladders are
+ * **distinct types**: `SessionStateWord` and `SessionPhase` are never assignable
+ * to each other, so a build that conflates them is a compile error rather than a
+ * corrupt replay digest (the phase count is baked into the RLE codec).
  */
 
 /** The five phases, in fixed order. A tick always carries one of these. */
@@ -60,5 +61,45 @@ export type SessionPhaseVocabulary =
 
 /** A type guard over the closed five — the way a JSON boundary proves a phase. */
 export function isSessionPhase(value: string): value is SessionPhase {
-  return (SESSION_PHASES as readonly string[]).includes(value);
+  return SESSION_PHASES.some((phase) => phase === value);
+}
+
+/**
+ * The user-visible state ladder — **four words**, distinct from the five-phase
+ * engine ladder (AD-25, addendum §C.8). It is the *only* vocabulary a rendered
+ * surface may show; the two ladders are never conflated in code or copy.
+ */
+export type SessionStateWord = 'QUIET' | 'LISTENING' | 'ACTIVE' | 'CONTACT';
+
+/** The ordered four, as a value — the closed set the presenter iterates. */
+export const SESSION_STATE_WORDS: readonly SessionStateWord[] = [
+  'QUIET',
+  'LISTENING',
+  'ACTIVE',
+  'CONTACT',
+];
+
+/**
+ * The one explicit mapping from the engine's five phases to the user's four
+ * words. The ladders do not map one-to-one — `ENCOUNTER_WINDOW` and
+ * `RESOLUTION` both read as `CONTACT`, because the hairline advances on phase
+ * completion while the word tracks what the user should *believe* is happening
+ * (addendum §C.8). This is the only place the two are allowed to touch.
+ */
+const STATE_WORD_BY_PHASE: Readonly<Record<SessionPhase, SessionStateWord>> = {
+  QUIET: 'QUIET',
+  SIGNALS: 'LISTENING',
+  ACTIVITY: 'ACTIVE',
+  ENCOUNTER_WINDOW: 'CONTACT',
+  RESOLUTION: 'CONTACT',
+};
+
+/** The user-visible word for an engine phase. Every phase maps to exactly one. */
+export function stateWordFor(phase: SessionPhase): SessionStateWord {
+  return STATE_WORD_BY_PHASE[phase];
+}
+
+/** A type guard over the closed four — the way a JSON boundary proves a word. */
+export function isSessionStateWord(value: string): value is SessionStateWord {
+  return SESSION_STATE_WORDS.some((word) => word === value);
 }

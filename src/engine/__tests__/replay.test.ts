@@ -3,35 +3,32 @@ import {
   type TickInput,
   type TickResult,
 } from '@/engine/InvestigationEngine';
-import { huntId, sessionMs, tickIndex } from '@/engine/models';
+import { huntId, sessionMs, tickIndex, unit } from '@/engine/models';
 import { seedFromParts } from '@/engine/RandomEngine';
 
 import { sessionSeedFixture, engineContentFixture } from './fixtures';
 
 /**
  * REPLAY_IDENTICAL: the same seed and the same `TickInput[]`, played twice,
- * produce identical `TickResult[]` — state, emissions and the `rng` snapshot.
+ * produce identical `TickResult[]` — state, emissions, the `rng` snapshot and
+ * the tick digest.
  *
  * This is the audit property AD-3 names; it has no UI and no displayed promise.
- * Story 2.2's engine now draws from `rng.events` on every tick, so the snapshot
- * compared here is the stream that drove the (still event-free, in this short
- * fixture) emissions.
+ * Story 2.2's engine draws from `rng.events` on every tick; Story 2.3 now also
+ * computes its own phase ladder and appends a digest value per tick, both folded
+ * into the compared surface.
  */
-const TICK_0: TickInput = {
-  tickIndex: tickIndex(0),
-  elapsedMs: sessionMs(0),
-  phase: 'QUIET',
-};
-const TICK_1: TickInput = {
-  tickIndex: tickIndex(1),
-  elapsedMs: sessionMs(5_000),
-  phase: 'QUIET',
-};
-const TICK_2: TickInput = {
-  tickIndex: tickIndex(2),
-  elapsedMs: sessionMs(11_000),
-  phase: 'QUIET',
-};
+function tickInput(tickIndexValue: number, elapsedMs: number): TickInput {
+  return {
+    tickIndex: tickIndex(tickIndexValue),
+    elapsedMs: sessionMs(elapsedMs),
+    movement: unit(0),
+    sensorAnomaly: unit(0),
+  };
+}
+const TICK_0: TickInput = tickInput(0, 0);
+const TICK_1: TickInput = tickInput(1, 5_000);
+const TICK_2: TickInput = tickInput(2, 11_000);
 const TICKS: readonly TickInput[] = [TICK_0, TICK_1, TICK_2];
 
 function createEngine() {
@@ -51,12 +48,13 @@ describe('replay', () => {
     expect(play()).toEqual(play());
   });
 
-  it('emits session_started once, on the very first tick', () => {
+  it('emits session_started once, then the opening phase, on the very first tick', () => {
     const engine = createEngine();
     const first = engine.tick(TICK_0);
     const second = engine.tick(TICK_1);
     expect(first.emissions).toEqual([
       { kind: 'notice', notice: 'session_started' },
+      { kind: 'phase', phase: 'QUIET', stateWord: 'QUIET', atMs: 0 },
     ]);
     expect(second.emissions).toEqual([]);
   });
@@ -85,6 +83,45 @@ describe('replay', () => {
     expect(after.state.status).toBe('running');
     expect(after.state.tickIndex).toBe(TICK_0.tickIndex);
     expect(after.state.elapsedMs).toBe(TICK_0.elapsedMs);
+    // Story 2.3: the engine computed its own phase, the user word and the digest.
+    expect(after.state.phase).toBe('QUIET');
+    expect(after.state.stateWord).toBe('QUIET');
+    expect(after.state.tension).toBe(0);
+    expect(after.state.digest).toEqual([{ value: 'QUIET', count: 1 }]);
+    expect(after.digest).toBe('QUIET');
+  });
+
+  it('advances its own ladder and records each tick in the RLE digest', () => {
+    const engine = createEngine();
+    engine.tick(TICK_0);
+    // Cross the QUIET floor (the engine's own gate is 180 s).
+    const later = engine.tick(tickInput(1, 200_000));
+    expect(later.state.phase).toBe('SIGNALS');
+    expect(later.state.stateWord).toBe('LISTENING');
+    expect(later.emissions).toContainEqual({
+      kind: 'phase',
+      phase: 'SIGNALS',
+      stateWord: 'LISTENING',
+      atMs: 200_000,
+    });
+    // Two runs of one tick each; the digest is never one entry per tick.
+    expect(later.state.digest).toEqual([
+      { value: 'QUIET', count: 1 },
+      { value: 'SIGNALS', count: 1 },
+    ]);
+    // Tension is the hidden scalar, kept in its band (never rendered).
+    expect(later.state.tension).toBeGreaterThanOrEqual(0);
+    expect(later.state.tension).toBeLessThanOrEqual(100);
+  });
+
+  it('finish records the terminal ENDED marker in the digest, not as a phase', () => {
+    const engine = createEngine();
+    engine.tick(TICK_0);
+    const ended = engine.finish('user_finished');
+    expect(ended.digest).toBe('ENDED');
+    expect(ended.state.digest.at(-1)).toEqual({ value: 'ENDED', count: 1 });
+    // `ENDED` never leaks into the phase field.
+    expect(ended.state.phase).toBe('QUIET');
   });
 
   it('ticking after finish is a programmer error', () => {
@@ -129,9 +166,11 @@ describe('replay', () => {
     ).toThrow(/no event table/);
   });
 
-  it('rejects a tick after the content names no table for the tick phase', () => {
+  it('rejects a tick after the content names no table for the phase the ladder reaches', () => {
     // A content bundle that has QUIET but not SIGNALS constructs, then throws on
-    // the first SIGNALS tick — the dependency is checked, not assumed.
+    // the first tick whose *own* ladder has advanced to SIGNALS — the dependency
+    // is checked, not assumed. The engine computes the phase now, so the tick is
+    // simply pushed past the QUIET gate (180 s).
     const content = engineContentFixture();
     const quietOnly = {
       ...content,
@@ -141,10 +180,28 @@ describe('replay', () => {
       content: quietOnly,
     });
     engine.tick(TICK_0);
-    // The tick must be past `nextEmissionAtMs` for the scheduler to look the
-    // table up, so step well past the fixture's 20 s floor.
-    expect(() =>
-      engine.tick({ tickIndex: tickIndex(3), elapsedMs: sessionMs(600_000), phase: 'SIGNALS' }),
-    ).toThrow(/no event table/);
+    // The tick must also be past `nextEmissionAtMs` for the scheduler to look the
+    // table up, so step well past the fixture's 20 s floor and the 180 s gate.
+    expect(() => engine.tick(tickInput(3, 600_000))).toThrow(/no event table/);
+  });
+
+  it('TENSION: the tick wiring lifts tension from the host drivers', () => {
+    // A host that reports movement must end a run hotter than one that reports
+    // none — otherwise the wiring (elapsedDeltaMs / movement / sensorAnomaly /
+    // emitted) is inert and every fold shipping `unit(0)` would look correct.
+    const driveTo = (movement: number): number => {
+      const engine = createEngine();
+      let tension = engine.tick(tickInput(0, 0)).state.tension;
+      for (let i = 1; i <= 30; i += 1) {
+        tension = engine.tick({
+          tickIndex: tickIndex(i),
+          elapsedMs: sessionMs(i * 1_000),
+          movement: unit(movement),
+          sensorAnomaly: unit(0),
+        }).state.tension;
+      }
+      return tension;
+    };
+    expect(driveTo(1)).toBeGreaterThan(driveTo(0));
   });
 });

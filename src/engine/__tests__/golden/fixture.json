@@ -10,6 +10,18 @@
       "notice": "session_started"
     },
     {
+      "kind": "phase",
+      "phase": "QUIET",
+      "stateWord": "QUIET",
+      "atMs": 0
+    },
+    {
+      "kind": "phase",
+      "phase": "SIGNALS",
+      "stateWord": "LISTENING",
+      "atMs": 180000
+    },
+    {
       "kind": "directive",
       "directiveId": "keep_watching",
       "text": "Keep watching.",
@@ -27,6 +39,12 @@
       "directiveId": "go_slowly",
       "text": "Go slowly.",
       "atMs": 411000
+    },
+    {
+      "kind": "phase",
+      "phase": "ACTIVITY",
+      "stateWord": "ACTIVE",
+      "atMs": 480000
     },
     {
       "kind": "event",
@@ -118,6 +136,12 @@
       "strength": 0.5624543117824942
     },
     {
+      "kind": "phase",
+      "phase": "ENCOUNTER_WINDOW",
+      "stateWord": "CONTACT",
+      "atMs": 840000
+    },
+    {
       "kind": "event",
       "definitionId": "close_pass",
       "category": "escalation",
@@ -164,6 +188,12 @@
       "category": "false_positive",
       "atMs": 970000,
       "strength": 0.5889477694407106
+    },
+    {
+      "kind": "phase",
+      "phase": "RESOLUTION",
+      "stateWord": "CONTACT",
+      "atMs": 1020000
     },
     {
       "kind": "event",

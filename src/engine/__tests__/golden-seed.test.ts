@@ -16,7 +16,7 @@ import {
   type GuaranteedEncounterReason,
   type SessionDirective,
 } from '@/engine/models';
-import { defaultPhaseSchedule, replaySession, replaySessionSeed } from '@/engine/replay';
+import { replayOptions, replaySession, replaySessionSeed } from '@/engine/replay';
 
 import fixture from './golden/fixture.json';
 
@@ -163,6 +163,13 @@ function serialize(emission: ReturnType<typeof replaySession>[number]): unknown 
         text: emission.text,
         atMs: emission.atMs,
       };
+    case 'phase':
+      return {
+        kind: 'phase',
+        phase: emission.phase,
+        stateWord: emission.stateWord,
+        atMs: emission.atMs,
+      };
     default:
       return assertNever(emission);
   }
@@ -175,17 +182,17 @@ describe('GOLDEN_SEED: the committed fixture replays identically', () => {
       huntId: fixture.huntId,
       contentVersion: fixture.contentVersion,
     });
-    const schedule = defaultPhaseSchedule(fixture.durationMs);
-    const actual = replaySession(session, loadShippedContent(), schedule).map(
+    const options = replayOptions(fixture.durationMs, fixture.tickMs);
+    const actual = replaySession(session, loadShippedContent(), options).map(
       serialize,
     );
     expect(actual).toEqual(fixture.expected);
   });
 
-  it('pins the schedule the fixture was recorded on', () => {
-    const schedule = defaultPhaseSchedule(fixture.durationMs);
-    expect(schedule.tickMs).toBe(fixture.tickMs);
-    expect(schedule.durationMs).toBe(fixture.durationMs);
+  it('pins the replay window the fixture was recorded on', () => {
+    const options = replayOptions(fixture.durationMs, fixture.tickMs);
+    expect(options.tickMs).toBe(fixture.tickMs);
+    expect(options.durationMs).toBe(fixture.durationMs);
   });
 
   it('begins with the lifecycle notice and has a non-trivial sequence', () => {
