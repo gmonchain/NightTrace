@@ -54,6 +54,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     userInterfaceStyle: 'dark',
     ios: {
       bundleIdentifier: `${BUNDLE_BASE}${idSuffix}`,
+      appleTeamId: '8A9HSYWCS6',
       deploymentTarget: '16.4',
       supportsTablet: false,
       // The highest-risk shipped strings AD-16 names: an iOS purpose string
@@ -64,6 +65,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       // sensor the About notice's SENSORS USED inventory names (Microphone,
       // Motion, Camera, Location), so the notice never overstates the binary.
       infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
         NSMotionUsageDescription:
           'Motion is used only while a session is open, to let the field respond to how you move. It never leaves this device.',
         NSMicrophoneUsageDescription:
