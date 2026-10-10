@@ -28,6 +28,9 @@ export type ContentVersion = Brand<string, 'ContentVersion'>;
 export type HuntId = Brand<string, 'HuntId'>;
 export type SessionId = Brand<string, 'SessionId'>;
 export type EventDefinitionId = Brand<string, 'EventDefinitionId'>;
+export type EventTableId = Brand<string, 'EventTableId'>;
+export type DirectiveId = Brand<string, 'DirectiveId'>;
+export type EncounterDefinitionId = Brand<string, 'EncounterDefinitionId'>;
 
 /** Milliseconds since the session start, never a wall clock. */
 export type SessionMs = Brand<number, 'SessionMs'>;
@@ -82,6 +85,21 @@ export function huntId(value: string): HuntId {
 
 export function eventDefinitionId(value: string): EventDefinitionId {
   return brandValue<string, 'EventDefinitionId'>(value);
+}
+
+/** The identity factory for an event-table id slug. */
+export function eventTableId(value: string): EventTableId {
+  return brandValue<string, 'EventTableId'>(value);
+}
+
+/** The identity factory for a session-directive id slug. */
+export function directiveId(value: string): DirectiveId {
+  return brandValue<string, 'DirectiveId'>(value);
+}
+
+/** The identity factory for an encounter-definition id slug. */
+export function encounterDefinitionId(value: string): EncounterDefinitionId {
+  return brandValue<string, 'EncounterDefinitionId'>(value);
 }
 
 /** The `'YYYY.MM.DD.N'` shape a content version must carry. */

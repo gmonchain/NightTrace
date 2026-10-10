@@ -185,6 +185,26 @@ const CONTENT_BAN = [
   ...ENGINE_MODELS_ONLY,
 ];
 
+/**
+ * Story 2.2 — the content-validation tests' import ban.
+ *
+ * The §C.6 seeded sweep and the golden-seed replay fold the *shipped* content
+ * (`src/data/**`) through the engine, so the content **test** tree must be able
+ * to import the engine's stages. This is that one relaxation: the engine's
+ * `ENGINE_MODELS_ONLY` patterns are filtered out of the Content ban for
+ * `src/data/__tests__/**` alone. Shipment code under `src/data/**` still reaches
+ * `engine/models` and nothing else (AD-1), and the boundary test keeps asserting
+ * that `src/data/x.ts` cannot import `@/engine/InvestigationEngine`.
+ */
+const CONTENT_TEST_BAN = CONTENT_BAN.filter(
+  (pattern) => !ENGINE_MODELS_ONLY.includes(pattern),
+);
+
+const CONTENT_TEST_ENGINE_MESSAGE =
+  'Story 2.2: a content-validation test may fold the shipped content through ' +
+  'the engine (the §C.6 seeded sweep and the golden replay). Shipment content ' +
+  'under src/data/** still reaches engine/models only (AD-1).';
+
 /** AD-1's random source. `Math.floor` and friends stay legal; this one call does not. */
 const ENGINE_SYNTAX = [
   {
@@ -693,6 +713,25 @@ module.exports = defineConfig([
           ],
         },
       ],
+    },
+  },
+
+  // Story 2.2: the content-validation tests fold the shipped content through
+  // the engine, so the engine's stages are re-permitted for `src/data/__tests__/**`
+  // alone (see `CONTENT_TEST_BAN`). Everything else the Content ban rejects —
+  // react, expo, the Shell, the sensors — still applies here. Declared last so
+  // it wins over the Content block for these files (flat-config last-match-wins);
+  // the SQL and console syntax selectors are re-included because declaring the
+  // block replaces the inherited `no-restricted-syntax` list.
+  {
+    files: ['src/data/__tests__/**/*.{ts,tsx}'],
+    rules: {
+      'no-console': 'error',
+      'no-restricted-imports': importBan(
+        CONTENT_TEST_BAN,
+        CONTENT_TEST_ENGINE_MESSAGE,
+      ),
+      'no-restricted-syntax': ['error', ...SQL_SELECTORS, CONSOLE_SYNTAX_SELECTOR],
     },
   },
 ]);

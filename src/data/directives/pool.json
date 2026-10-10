@@ -1,0 +1,90 @@
+[
+  {
+    "id": "hold_still",
+    "text": "Hold still.",
+    "guaranteedEncounters": [],
+    "bannedEvents": [],
+    "silenceScale": 1.15,
+    "tensionCeiling": 100,
+    "minimumDurationMs": null,
+    "allowEarlyEncounter": false,
+    "flavourNote": null
+  },
+  {
+    "id": "stay_quiet",
+    "text": "Stay quiet.",
+    "guaranteedEncounters": [],
+    "bannedEvents": [],
+    "silenceScale": 1.1,
+    "tensionCeiling": 100,
+    "minimumDurationMs": null,
+    "allowEarlyEncounter": false,
+    "flavourNote": null
+  },
+  {
+    "id": "keep_watching",
+    "text": "Keep watching.",
+    "guaranteedEncounters": [],
+    "bannedEvents": [],
+    "silenceScale": 1.0,
+    "tensionCeiling": 100,
+    "minimumDurationMs": null,
+    "allowEarlyEncounter": false,
+    "flavourNote": null
+  },
+  {
+    "id": "wait",
+    "text": "Wait.",
+    "guaranteedEncounters": [],
+    "bannedEvents": ["wind_shift"],
+    "silenceScale": 1.15,
+    "tensionCeiling": 100,
+    "minimumDurationMs": null,
+    "allowEarlyEncounter": false,
+    "flavourNote": null
+  },
+  {
+    "id": "move_on",
+    "text": "Move on.",
+    "guaranteedEncounters": [],
+    "bannedEvents": [],
+    "silenceScale": 1.0,
+    "tensionCeiling": 100,
+    "minimumDurationMs": null,
+    "allowEarlyEncounter": false,
+    "flavourNote": null
+  },
+  {
+    "id": "go_slowly",
+    "text": "Go slowly.",
+    "guaranteedEncounters": [],
+    "bannedEvents": [],
+    "silenceScale": 1.05,
+    "tensionCeiling": 100,
+    "minimumDurationMs": null,
+    "allowEarlyEncounter": false,
+    "flavourNote": null
+  },
+  {
+    "id": "take_your_time",
+    "text": "Take your time.",
+    "guaranteedEncounters": [],
+    "bannedEvents": [],
+    "silenceScale": 1.05,
+    "tensionCeiling": 100,
+    "minimumDurationMs": null,
+    "allowEarlyEncounter": false,
+    "flavourNote": null
+  },
+  {
+    "id": "let_this_run",
+    "text": "Let this run.",
+    "guaranteedEncounters": [],
+    "bannedEvents": ["misread_shadow"],
+    "silenceScale": 1.0,
+    "tensionCeiling": 100,
+    "minimumDurationMs": null,
+    "allowEarlyEncounter": false,
+    "flavourNote": null
+  }
+]

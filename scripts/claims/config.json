@@ -100,6 +100,11 @@
       "kind": "ui-string-table"
     },
     {
+      "key": "content.directive-pool",
+      "path": "src/data/directives/pool.json",
+      "kind": "content-string-table"
+    },
+    {
       "key": "native.ios-purpose-strings",
       "path": "app.config.ts",
       "kind": "ios-purpose-string"

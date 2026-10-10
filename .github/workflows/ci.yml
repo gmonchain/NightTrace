@@ -9,11 +9,11 @@ name: CI
 #   - content validation + aliases (AD-9, AD-18) — Story 3.1 (emission bank,
 #     glyph set); the Alien-voice half lands in Story 5.6
 #   - migration idempotency (AD-22)      — Story 2.5
-#   - golden-seed replay (AD-3)          — Story 2.2
 #
-# Two gates are already appended below, by the stories that built them:
-# Story 1.4's grain-reproducibility gate (`npm run grain:check`) and Story
-# 1.5's claims lint (`npm run claims:check`, AD-16 / NFR-18).
+# Three gates are already appended below, by the stories that built them:
+# Story 1.4's grain-reproducibility gate (`npm run grain:check`), Story
+# 1.5's claims lint (`npm run claims:check`, AD-16 / NFR-18) and Story 2.2's
+# golden-seed replay (`npm run golden:seed`, AD-3).
 #
 # No placeholder gate is declared here: an unimplemented gate that passes reads
 # as coverage, which is worse than an absent one.
@@ -75,6 +75,13 @@ jobs:
       # CI-visible.
       - name: Grain tile is reproducible
         run: npm run grain:check
+
+      # Story 2.2's golden-seed replay (AD-3): the committed fixture must fold
+      # the *shipped* content to an identical emission sequence. A changed table
+      # weight or gap distribution diverges it, so this step is what makes a
+      # replay-breaking content change CI-visible.
+      - name: Golden-seed fixture replays identically
+        run: npm run golden:seed
 
       # The launch AC's only CI-visible proxy. `verify` cannot see a broken
       # route tree: expo-router scans `src/app/**` with `require.context`, so a

@@ -2,7 +2,7 @@ import { createInvestigationEngine } from '@/engine/InvestigationEngine';
 import { sessionMs, tickIndex } from '@/engine/models';
 import { createRandomEngine, seedFromParts } from '@/engine/RandomEngine';
 
-import { sessionSeedFixture } from './fixtures';
+import { sessionSeedFixture, engineContentFixture } from './fixtures';
 
 /**
  * The `engine` Vitest project runs on the plain `node` environment — which is
@@ -30,8 +30,14 @@ describe('engine project runtime', () => {
     expect(draw).toBeGreaterThanOrEqual(0);
     expect(draw).toBeLessThan(1);
 
-    const engine = createInvestigationEngine(sessionSeedFixture());
-    const first = engine.tick({ tickIndex: tickIndex(0), elapsedMs: sessionMs(0) });
+    const engine = createInvestigationEngine(sessionSeedFixture(), {
+      content: engineContentFixture(),
+    });
+    const first = engine.tick({
+      tickIndex: tickIndex(0),
+      elapsedMs: sessionMs(0),
+      phase: 'QUIET',
+    });
     expect(first.state.status).toBe('running');
     expect(first.emissions).toHaveLength(1);
   });

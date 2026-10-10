@@ -55,8 +55,12 @@ describe('model conventions', () => {
     expect(emission.kind).toBe('notice');
     // The completeness gate: a new Emission variant makes this `Record`
     // incomplete — a compile error — exactly as a consumer's `default` arm does.
-    const handled: Readonly<Record<Emission['kind'], true>> = { notice: true };
-    expect(Object.keys(handled)).toEqual(['notice']);
+    const handled: Readonly<Record<Emission['kind'], true>> = {
+      notice: true,
+      event: true,
+      directive: true,
+    };
+    expect(Object.keys(handled)).toEqual(['notice', 'event', 'directive']);
   });
 
   it('assertNever is the exhaustiveness gate a consumer switch ends with', () => {

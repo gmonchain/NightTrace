@@ -1,0 +1,189 @@
+{
+  "seed": "golden-seed-2.2",
+  "huntId": "the-watcher",
+  "contentVersion": "2026.10.05.1",
+  "tickMs": 1000,
+  "durationMs": 1200000,
+  "expected": [
+    {
+      "kind": "notice",
+      "notice": "session_started"
+    },
+    {
+      "kind": "directive",
+      "directiveId": "keep_watching",
+      "text": "Keep watching.",
+      "atMs": 231000
+    },
+    {
+      "kind": "event",
+      "definitionId": "knock",
+      "category": "signal",
+      "atMs": 339000,
+      "strength": 0.7210327666718512
+    },
+    {
+      "kind": "directive",
+      "directiveId": "go_slowly",
+      "text": "Go slowly.",
+      "atMs": 411000
+    },
+    {
+      "kind": "event",
+      "definitionId": "light_flicker",
+      "category": "signal",
+      "atMs": 535000,
+      "strength": 0.647287992015481
+    },
+    {
+      "kind": "event",
+      "definitionId": "branch_snap",
+      "category": "signal",
+      "atMs": 550000,
+      "strength": 0.7754298987798393
+    },
+    {
+      "kind": "event",
+      "definitionId": "pressure_rise",
+      "category": "escalation",
+      "atMs": 558000,
+      "strength": 0.6404498394113034
+    },
+    {
+      "kind": "directive",
+      "directiveId": "take_your_time",
+      "text": "Take your time.",
+      "atMs": 591000
+    },
+    {
+      "kind": "event",
+      "definitionId": "whisper_tail",
+      "category": "signal",
+      "atMs": 641000,
+      "strength": 0.42050976455211636
+    },
+    {
+      "kind": "event",
+      "definitionId": "misread_shadow",
+      "category": "false_positive",
+      "atMs": 661000,
+      "strength": 0.4190330495126545
+    },
+    {
+      "kind": "event",
+      "definitionId": "branch_snap",
+      "category": "signal",
+      "atMs": 669000,
+      "strength": 0.5296574364881963
+    },
+    {
+      "kind": "event",
+      "definitionId": "misread_shadow",
+      "category": "false_positive",
+      "atMs": 763000,
+      "strength": 0.470975250704214
+    },
+    {
+      "kind": "event",
+      "definitionId": "branch_snap",
+      "category": "signal",
+      "atMs": 769000,
+      "strength": 0.3918295845855027
+    },
+    {
+      "kind": "directive",
+      "directiveId": "keep_watching",
+      "text": "Keep watching.",
+      "atMs": 771000
+    },
+    {
+      "kind": "event",
+      "definitionId": "pressure_rise",
+      "category": "escalation",
+      "atMs": 774000,
+      "strength": 0.7351529269013554
+    },
+    {
+      "kind": "event",
+      "definitionId": "static_hiss",
+      "category": "signal",
+      "atMs": 827000,
+      "strength": 0.7592018724884837
+    },
+    {
+      "kind": "event",
+      "definitionId": "whisper_tail",
+      "category": "signal",
+      "atMs": 836000,
+      "strength": 0.5624543117824942
+    },
+    {
+      "kind": "event",
+      "definitionId": "close_pass",
+      "category": "escalation",
+      "atMs": 856000,
+      "strength": 0.4875032398849726
+    },
+    {
+      "kind": "event",
+      "definitionId": "answer_hint",
+      "category": "bait",
+      "atMs": 886000,
+      "strength": 0.8727000004146248
+    },
+    {
+      "kind": "event",
+      "definitionId": "approach",
+      "category": "escalation",
+      "atMs": 890000,
+      "strength": 0.3723781993612647
+    },
+    {
+      "kind": "event",
+      "definitionId": "near_call",
+      "category": "bait",
+      "atMs": 905000,
+      "strength": 0.7712080193683505
+    },
+    {
+      "kind": "event",
+      "definitionId": "pressure_rise",
+      "category": "escalation",
+      "atMs": 937000,
+      "strength": 0.34909225688315926
+    },
+    {
+      "kind": "directive",
+      "directiveId": "go_slowly",
+      "text": "Go slowly.",
+      "atMs": 951000
+    },
+    {
+      "kind": "event",
+      "definitionId": "misread_shadow",
+      "category": "false_positive",
+      "atMs": 970000,
+      "strength": 0.5889477694407106
+    },
+    {
+      "kind": "event",
+      "definitionId": "steady_listening",
+      "category": "ritual",
+      "atMs": 1049000,
+      "strength": 0.605044898763299
+    },
+    {
+      "kind": "event",
+      "definitionId": "wind_shift",
+      "category": "false_positive",
+      "atMs": 1088000,
+      "strength": 0.8532240683678538
+    },
+    {
+      "kind": "directive",
+      "directiveId": "keep_watching",
+      "text": "Keep watching.",
+      "atMs": 1131000
+    }
+  ]
+}

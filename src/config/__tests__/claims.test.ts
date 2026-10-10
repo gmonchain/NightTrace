@@ -46,13 +46,14 @@ const WRONG_VARIANT = 'Nothing here is a measurement.';
 const NATIVE_CONFIG = 'app.config.ts';
 const UI_STRINGS_ROOT = path.join('src', 'data', 'strings');
 const LISTING_REL = path.join('assets', 'store', 'listing.json');
+const DIRECTIVE_POOL_REL = path.join('src', 'data', 'directives', 'pool.json');
 
 /**
  * The kind→carrier table. Every declared surface kind resolves to exactly one
  * carrier: a `ui.*` kind to the `src/data/strings` string tables, a `native.*`
- * kind to `app.config.ts`, a `store.*` kind to `assets/store/listing.json`. The
- * coverage test walks these carriers, so a new file under one is not covered
- * until it is declared.
+ * kind to `app.config.ts`, a `store.*` kind to `assets/store/listing.json`, and
+ * a `content.*` kind to the content JSON it names. The coverage test walks these
+ * carriers, so a new file under one is not covered until it is declared.
  */
 const KIND_CARRIER: Readonly<Record<string, string>> = {
   'ui-string-table': UI_STRINGS_ROOT,
@@ -63,10 +64,16 @@ const KIND_CARRIER: Readonly<Record<string, string>> = {
   'store-subtitle': LISTING_REL,
   'store-description': LISTING_REL,
   'screenshot-caption': LISTING_REL,
+  'content-string-table': DIRECTIVE_POOL_REL,
 };
 
 /** The roots the declared surfaces live in — every file there must be declared. */
-const COPY_ROOTS = [UI_STRINGS_ROOT, path.dirname(LISTING_REL), NATIVE_CONFIG];
+const COPY_ROOTS = [
+  UI_STRINGS_ROOT,
+  path.dirname(LISTING_REL),
+  NATIVE_CONFIG,
+  DIRECTIVE_POOL_REL,
+];
 
 /** The iOS purpose string each sensor in the notice's inventory must declare. */
 const SENSOR_PURPOSE_STRING: Readonly<Record<string, string>> = {

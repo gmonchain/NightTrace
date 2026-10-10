@@ -1,0 +1,31 @@
+[
+  { "id": "ambient_hush", "category": "ambient", "weight": 1.0, "cooldownMs": 0, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "distant_ambience", "category": "ambient", "weight": 0.6, "cooldownMs": 0, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "far_echo", "category": "ambient", "weight": 0.5, "cooldownMs": 90000, "oncePerSession": false, "extendsSilenceMs": null },
+
+  { "id": "knock", "category": "signal", "weight": 1.0, "cooldownMs": 480000, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "branch_snap", "category": "signal", "weight": 0.8, "cooldownMs": 90000, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "whisper_tail", "category": "signal", "weight": 0.7, "cooldownMs": 120000, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "static_hiss", "category": "signal", "weight": 0.7, "cooldownMs": 110000, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "light_flicker", "category": "signal", "weight": 0.6, "cooldownMs": 150000, "oncePerSession": true, "extendsSilenceMs": null },
+
+  { "id": "answer_hint", "category": "bait", "weight": 0.5, "cooldownMs": 180000, "oncePerSession": true, "extendsSilenceMs": null },
+  { "id": "near_call", "category": "bait", "weight": 0.6, "cooldownMs": 140000, "oncePerSession": false, "extendsSilenceMs": null },
+
+  { "id": "approach", "category": "escalation", "weight": 0.7, "cooldownMs": 180000, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "pressure_rise", "category": "escalation", "weight": 0.6, "cooldownMs": 150000, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "close_pass", "category": "escalation", "weight": 0.5, "cooldownMs": 240000, "oncePerSession": true, "extendsSilenceMs": null },
+
+  { "id": "withdraw", "category": "retreat", "weight": 0.7, "cooldownMs": 150000, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "fade_out", "category": "retreat", "weight": 0.7, "cooldownMs": 120000, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "quiet_after", "category": "retreat", "weight": 0.7, "cooldownMs": 90000, "oncePerSession": false, "extendsSilenceMs": null },
+
+  { "id": "misread_shadow", "category": "false_positive", "weight": 0.9, "cooldownMs": 90000, "oncePerSession": false, "extendsSilenceMs": null },
+  { "id": "wind_shift", "category": "false_positive", "weight": 0.8, "cooldownMs": 60000, "oncePerSession": false, "extendsSilenceMs": null },
+
+  { "id": "held_breath", "category": "ritual", "weight": 0.6, "cooldownMs": 150000, "oncePerSession": true, "extendsSilenceMs": null },
+  { "id": "steady_listening", "category": "ritual", "weight": 0.6, "cooldownMs": 120000, "oncePerSession": false, "extendsSilenceMs": null },
+
+  { "id": "deep_quiet", "category": "silence", "weight": 1.0, "cooldownMs": 60000, "oncePerSession": false, "extendsSilenceMs": 20000 },
+  { "id": "long_pause", "category": "silence", "weight": 0.8, "cooldownMs": 45000, "oncePerSession": false, "extendsSilenceMs": 12000 }
+]

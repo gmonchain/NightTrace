@@ -1,0 +1,78 @@
+[
+  {
+    "id": "table_quiet",
+    "phase": "QUIET",
+    "entries": [
+      { "definitionId": "ambient_hush", "weight": 1.0 },
+      { "definitionId": "distant_ambience", "weight": 0.6 },
+      { "definitionId": "far_echo", "weight": 0.5 },
+      { "definitionId": "steady_listening", "weight": 0.5 },
+      { "definitionId": "long_pause", "weight": 0.15 }
+    ],
+    "emptyWeight": 0.3,
+    "silenceFloorMs": 6000,
+    "intervalMeanMs": 125000
+  },
+  {
+    "id": "table_signals",
+    "phase": "SIGNALS",
+    "entries": [
+      { "definitionId": "knock", "weight": 0.8 },
+      { "definitionId": "branch_snap", "weight": 0.9 },
+      { "definitionId": "whisper_tail", "weight": 0.8 },
+      { "definitionId": "static_hiss", "weight": 0.7 },
+      { "definitionId": "far_echo", "weight": 0.5 },
+      { "definitionId": "long_pause", "weight": 0.15 }
+    ],
+    "emptyWeight": 0.35,
+    "silenceFloorMs": 4000,
+    "intervalMeanMs": 74000
+  },
+  {
+    "id": "table_activity",
+    "phase": "ACTIVITY",
+    "entries": [
+      { "definitionId": "branch_snap", "weight": 0.8 },
+      { "definitionId": "whisper_tail", "weight": 0.7 },
+      { "definitionId": "static_hiss", "weight": 0.7 },
+      { "definitionId": "light_flicker", "weight": 0.6 },
+      { "definitionId": "misread_shadow", "weight": 0.7 },
+      { "definitionId": "pressure_rise", "weight": 0.6 },
+      { "definitionId": "deep_quiet", "weight": 0.15 }
+    ],
+    "emptyWeight": 0.4,
+    "silenceFloorMs": 3000,
+    "intervalMeanMs": 15000
+  },
+  {
+    "id": "table_encounter_window",
+    "phase": "ENCOUNTER_WINDOW",
+    "entries": [
+      { "definitionId": "approach", "weight": 0.8 },
+      { "definitionId": "near_call", "weight": 0.7 },
+      { "definitionId": "pressure_rise", "weight": 0.6 },
+      { "definitionId": "close_pass", "weight": 0.5 },
+      { "definitionId": "answer_hint", "weight": 0.5 },
+      { "definitionId": "misread_shadow", "weight": 0.5 },
+      { "definitionId": "deep_quiet", "weight": 0.15 }
+    ],
+    "emptyWeight": 0.4,
+    "silenceFloorMs": 3000,
+    "intervalMeanMs": 14000
+  },
+  {
+    "id": "table_resolution",
+    "phase": "RESOLUTION",
+    "entries": [
+      { "definitionId": "withdraw", "weight": 0.8 },
+      { "definitionId": "fade_out", "weight": 0.7 },
+      { "definitionId": "quiet_after", "weight": 0.7 },
+      { "definitionId": "steady_listening", "weight": 0.6 },
+      { "definitionId": "wind_shift", "weight": 0.6 },
+      { "definitionId": "long_pause", "weight": 0.15 }
+    ],
+    "emptyWeight": 0.35,
+    "silenceFloorMs": 5000,
+    "intervalMeanMs": 80000
+  }
+]

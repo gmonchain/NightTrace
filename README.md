@@ -136,12 +136,12 @@ the gates run: the token-sync test (AD-17) is a `ui`-project Vitest suite, so
 `npm test` runs it; the AD-17 raw-value lint is defined in `eslint.config.js`
 and run by `npm run lint`; and Story 1.5's claims lint
 (`npm run claims:check`, AD-16 / NFR-18) is the last link of the `verify` chain.
-One further gate is appended to `ci.yml` as its own step by the story that built
-it — Story 1.4's grain-reproducibility check (`npm run grain:check`) — and the
-claims lint runs there once more, over the committed tree. Gates belonging to
-later stories — content validation and aliases (AD-9, AD-18), migration
-idempotency (AD-22) and the golden-seed replay (AD-3) — are appended the same
-way.
+Two further gates are appended to `ci.yml` as their own steps by the stories that
+built them — Story 1.4's grain-reproducibility check (`npm run grain:check`) and
+Story 2.2's golden-seed replay (`npm run golden:seed`, AD-3) — and the claims
+lint runs there once more, over the committed tree. Gates belonging to later
+stories — content validation and aliases (AD-9, AD-18) and migration idempotency
+(AD-22) — are appended the same way.
 
 **The claims lint (AD-16 / NFR-18).** No shipped sentence may assert anything
 about the real world. `npm run claims:check` reads the declared, enumerated
