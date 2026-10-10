@@ -2,16 +2,21 @@
   "name": "nighttrace",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@10.10.0",
   "main": "expo-router/entry",
   "engines": {
     "node": ">=22.13"
   },
   "scripts": {
     "start": "expo start",
+    "ios": "expo run:ios",
+    "android": "expo run:android",
+    "web": "expo start --web",
     "prebuild": "expo prebuild",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ignore-pattern 'src/**/__boundary_fixtures__/**'",
     "test": "vitest run",
+    "test:watch": "vitest",
     "grain:check": "node scripts/check-grain.mjs",
     "golden:seed": "node scripts/golden-seed.mjs",
     "claims:check": "node scripts/claims-lint.mjs",
